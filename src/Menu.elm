@@ -26,8 +26,8 @@ update msg (Menu menu) =
             Menu { menu | starting = False }
 
 
-view : Model -> Element Msg
-view (Menu { starting }) =
+view : { pageTitle : String } -> Model -> Element Msg
+view { pageTitle } (Menu { starting }) =
     Element.row
         [ Element.alignTop
         , Element.alignLeft
@@ -38,7 +38,7 @@ view (Menu { starting }) =
         , Element.spacing 20
         , style "transform"
             (if starting then
-                "scale(1.5)"
+                "scale(1.25)"
 
              else
                 "scale(1)"
@@ -53,6 +53,12 @@ view (Menu { starting }) =
           <|
             Element.text "danmarcab.com"
         , divider
+        , Element.el
+            [ Font.bold
+            , Font.size 25
+            ]
+          <|
+            Element.text pageTitle
         ]
 
 

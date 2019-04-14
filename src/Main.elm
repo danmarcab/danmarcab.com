@@ -6,7 +6,7 @@ import Element
 import Element.Font as Font
 import Menu
 import Page.Home
-import Page.QuadDivision
+import Page.QuadDivision as QuadDivision
 import Route exposing (Route)
 import Url exposing (Url)
 
@@ -20,7 +20,7 @@ type alias Model =
 
 type PageModel
     = Home
-    | QuadDivision
+    | QuadDivision QuadDivision.Model
 
 
 type Msg
@@ -29,13 +29,13 @@ type Msg
     | GoToRoute Route
     | MenuMsg Menu.Msg
     | HomeMsg Page.Home.Msg
-    | QuadDivisionMsg Page.QuadDivision.Msg
+    | QuadDivisionMsg QuadDivision.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        ClickedLink urlRequest ->
+    case ( msg, model.page ) of
+        ( ClickedLink urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model
@@ -47,23 +47,33 @@ update msg model =
                     , Navigation.load url
                     )
 
-        GoToRoute route ->
+        ( GoToRoute route, _ ) ->
             ( model, goToRoute model.navKey route )
 
-        NavigateTo url ->
+        ( NavigateTo url, _ ) ->
             let
                 ( page, cmd ) =
                     initPageFromUrl url
             in
             ( { model | page = page }, cmd )
 
-        MenuMsg menuMsg ->
+        ( MenuMsg menuMsg, _ ) ->
             ( { model | menu = Menu.update menuMsg model.menu }, Cmd.none )
 
-        HomeMsg _ ->
+        ( HomeMsg _, Home ) ->
             ( model, Cmd.none )
 
-        QuadDivisionMsg _ ->
+        ( HomeMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( QuadDivisionMsg subMsg, QuadDivision subModel ) ->
+            let
+                ( newModel, cmd ) =
+                    QuadDivision.update subMsg subModel
+            in
+            ( { model | page = QuadDivision newModel }, Cmd.map QuadDivisionMsg cmd )
+
+        ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
 
 
@@ -86,10 +96,10 @@ view model =
                     , body = Element.map HomeMsg body
                     }
 
-                QuadDivision ->
+                QuadDivision pageModel ->
                     let
                         { title, body } =
-                            Page.QuadDivision.view
+                            QuadDivision.view pageModel
                     in
                     { title = title
                     , body = Element.map QuadDivisionMsg body
@@ -101,12 +111,14 @@ view model =
             [ Font.family
                 [ Font.sansSerif
                 ]
-            , Element.inFront (Element.map MenuMsg <| Menu.view model.menu)
+            , Element.inFront (Element.map MenuMsg <| Menu.view { pageTitle = pageDocument.title } model.menu)
             ]
           <|
             Element.el
                 [ Element.centerX
                 , Element.centerY
+                , Element.width Element.fill
+                , Element.height Element.fill
                 ]
                 pageDocument.body
         ]
@@ -121,8 +133,8 @@ subscriptions model =
                 Home ->
                     Sub.none
 
-                QuadDivision ->
-                    Sub.none
+                QuadDivision pageModel ->
+                    Sub.map QuadDivisionMsg (QuadDivision.subscriptions pageModel)
     in
     Sub.batch
         [ pageSubscriptions
@@ -173,4 +185,8 @@ initPageFromUrl url =
             ( Home, Cmd.none )
 
         Route.QuadDivision ->
-            ( QuadDivision, Cmd.none )
+            let
+                ( model, cmd ) =
+                    QuadDivision.init
+            in
+            ( QuadDivision model, Cmd.map QuadDivisionMsg cmd )
