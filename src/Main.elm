@@ -5,6 +5,8 @@ import Browser.Navigation as Navigation
 import Element
 import Element.Font as Font
 import Menu
+import Page.Home
+import Page.QuadDivision
 import Route exposing (Route)
 import Url exposing (Url)
 
@@ -26,6 +28,8 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | GoToRoute Route
     | MenuMsg Menu.Msg
+    | HomeMsg Page.Home.Msg
+    | QuadDivisionMsg Page.QuadDivision.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,6 +60,12 @@ update msg model =
         MenuMsg menuMsg ->
             ( { model | menu = Menu.update menuMsg model.menu }, Cmd.none )
 
+        HomeMsg _ ->
+            ( model, Cmd.none )
+
+        QuadDivisionMsg _ ->
+            ( model, Cmd.none )
+
 
 goToRoute : Navigation.Key -> Route -> Cmd msg
 goToRoute navKey route =
@@ -65,16 +75,27 @@ goToRoute navKey route =
 view : Model -> Browser.Document Msg
 view model =
     let
-        pageView =
-            Element.el [ Element.centerX, Element.centerY ] <|
-                case model.page of
-                    Home ->
-                        Element.text "home"
+        pageDocument =
+            case model.page of
+                Home ->
+                    let
+                        { title, body } =
+                            Page.Home.view
+                    in
+                    { title = title
+                    , body = Element.map HomeMsg body
+                    }
 
-                    QuadDivision ->
-                        Element.text "quad divison"
+                QuadDivision ->
+                    let
+                        { title, body } =
+                            Page.QuadDivision.view
+                    in
+                    { title = title
+                    , body = Element.map QuadDivisionMsg body
+                    }
     in
-    { title = "danmarcab.com"
+    { title = pageDocument.title ++ " - danmarcab.com"
     , body =
         [ Element.layout
             [ Font.family
@@ -83,14 +104,30 @@ view model =
             , Element.inFront (Element.map MenuMsg <| Menu.view model.menu)
             ]
           <|
-            pageView
+            Element.el
+                [ Element.centerX
+                , Element.centerY
+                ]
+                pageDocument.body
         ]
     }
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    let
+        pageSubscriptions =
+            case model.page of
+                Home ->
+                    Sub.none
+
+                QuadDivision ->
+                    Sub.none
+    in
+    Sub.batch
+        [ pageSubscriptions
+        , Sub.none
+        ]
 
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
