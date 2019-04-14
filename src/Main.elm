@@ -4,12 +4,14 @@ import Browser
 import Browser.Navigation as Navigation
 import Element
 import Element.Font as Font
+import Menu
 import Route exposing (Route)
 import Url exposing (Url)
 
 
 type alias Model =
     { navKey : Navigation.Key
+    , menu : Menu.Model
     , page : PageModel
     }
 
@@ -23,6 +25,7 @@ type Msg
     = NavigateTo Url
     | ClickedLink Browser.UrlRequest
     | GoToRoute Route
+    | MenuMsg Menu.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,6 +53,9 @@ update msg model =
             in
             ( { model | page = page }, cmd )
 
+        MenuMsg menuMsg ->
+            ( { model | menu = Menu.update menuMsg model.menu }, Cmd.none )
+
 
 goToRoute : Navigation.Key -> Route -> Cmd msg
 goToRoute navKey route =
@@ -60,12 +66,13 @@ view : Model -> Browser.Document Msg
 view model =
     let
         pageView =
-            case model.page of
-                Home ->
-                    Element.text "home"
+            Element.el [ Element.centerX, Element.centerY ] <|
+                case model.page of
+                    Home ->
+                        Element.text "home"
 
-                QuadDivision ->
-                    Element.text "quad divison"
+                    QuadDivision ->
+                        Element.text "quad divison"
     in
     { title = "danmarcab.com"
     , body =
@@ -73,6 +80,7 @@ view model =
             [ Font.family
                 [ Font.sansSerif
                 ]
+            , Element.inFront (Element.map MenuMsg <| Menu.view model.menu)
             ]
           <|
             pageView
@@ -90,11 +98,18 @@ init flags url navKey =
     let
         ( page, cmd ) =
             initPageFromUrl url
+
+        ( menu, menuCmd ) =
+            Menu.init
     in
     ( { navKey = navKey
+      , menu = menu
       , page = page
       }
-    , Cmd.batch [ cmd ]
+    , Cmd.batch
+        [ cmd
+        , Cmd.map MenuMsg menuCmd
+        ]
     )
 
 
