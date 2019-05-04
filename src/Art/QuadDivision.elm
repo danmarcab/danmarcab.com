@@ -1,4 +1,17 @@
-module Art.QuadDivision exposing (Model, done, initialize, subdivide, view)
+module Art.QuadDivision exposing
+    ( Model
+    , SettingChange(..)
+    , Settings
+    , changeSetting
+    , defaultSettings
+    , done
+    , generate
+    , initialize
+    , restart
+    , settings
+    , subdivideStep
+    , view
+    )
 
 import Array exposing (Array)
 import Art.QuadDivision.Quad as Quad exposing (Quad)
@@ -11,34 +24,117 @@ import Util.Batcher as Batcher exposing (Batcher)
 import Util.Collection as Collection exposing (Collection)
 
 
+
+-- SETTINGS
+
+
+type alias Settings =
+    { separation : Float
+    , minSide : Float
+    , minArea : Float
+    }
+
+
+settings : Model -> Settings
+settings (Model model) =
+    model.settings
+
+
+defaultSettings : Viewport -> Settings
+defaultSettings viewport =
+    let
+        separation =
+            min viewport.viewport.width viewport.viewport.height
+                |> (\num -> num / 1000.0)
+                |> round
+                |> (\num -> num * 5)
+                |> toFloat
+    in
+    { separation = separation
+    , minSide = separation * 20
+    , minArea = separation * separation * 1000
+    }
+
+
+type SettingChange
+    = ChangeSeparation Float
+    | ChangeMinSide Float
+    | ChangeMinArea Float
+
+
+changeSetting : SettingChange -> Model -> Model
+changeSetting change (Model model) =
+    let
+        oldSettings =
+            model.settings
+
+        newSettings =
+            case change of
+                ChangeSeparation newSeparation ->
+                    { oldSettings | separation = newSeparation }
+
+                ChangeMinSide newMinSide ->
+                    { oldSettings | minSide = newMinSide }
+
+                ChangeMinArea newMinArea ->
+                    { oldSettings | minArea = newMinArea }
+    in
+    Model { model | settings = newSettings }
+
+
+
+-- MODEL
+
+
 type Model
     = Model
         { seed : Random.Seed
         , quads : Collection Quad
         , quadBatcher : Batcher Quad
-        , separation : Float
+        , settings : Settings
         , viewport : Viewport
         }
 
 
-initialize : Int -> Viewport -> Model
-initialize initialSeed viewport =
+initialize : { settings : Settings, initialSeed : Int, viewport : Viewport } -> Model
+initialize params =
+    Model
+        { seed = Random.initialSeed params.initialSeed
+        , quads = Collection.empty
+        , quadBatcher = Batcher.new 100
+        , viewport = params.viewport
+        , settings = params.settings
+        }
+        |> restart
+
+
+generate : { settings : Settings, initialSeed : Int, viewport : Viewport } -> Model
+generate params =
     let
-        seed =
-            Random.initialSeed initialSeed
+        loop model =
+            if done model then
+                model
 
+            else
+                subdivideStep model
+                    |> loop
+    in
+    initialize params
+        |> loop
+
+
+restart : Model -> Model
+restart (Model model) =
+    let
         ( initialQuad, seed2 ) =
-            Random.step (Quad.initialQuadGenerator viewport.scene) seed
-
-        separation =
-            min viewport.viewport.width viewport.viewport.height / 200.0
+            Random.step (Quad.initialQuadGenerator model.viewport.scene) model.seed
     in
     Model
         { seed = seed2
         , quads = Collection.fromItems [ initialQuad ]
         , quadBatcher = Batcher.new 100
-        , viewport = viewport
-        , separation = separation
+        , viewport = model.viewport
+        , settings = model.settings
         }
 
 
@@ -47,8 +143,8 @@ done (Model { quads }) =
     Collection.isEmpty quads
 
 
-subdivide : Model -> Model
-subdivide (Model model) =
+subdivideStep : Model -> Model
+subdivideStep (Model model) =
     let
         ( indexToSubdivide, newSeed ) =
             Random.step
@@ -61,10 +157,10 @@ subdivide (Model model) =
         Just quad ->
             let
                 ( nextSeed, dividedQuads ) =
-                    Quad.subdivide newSeed model.separation quad
+                    Quad.subdivide newSeed model.settings quad
 
                 ( divisibleQuads, staticQuads ) =
-                    List.partition (Quad.canSubdivide model.separation) dividedQuads
+                    List.partition (Quad.canSubdivide model.settings) dividedQuads
             in
             Model
                 { model
@@ -75,6 +171,10 @@ subdivide (Model model) =
 
         Nothing ->
             Model { model | seed = newSeed }
+
+
+
+-- VIEW
 
 
 view : Model -> Svg Never
@@ -100,12 +200,12 @@ view (Model model) =
         ]
         ([ Svg.g []
             (Collection.items model.quads
-                |> List.map Quad.view
+                |> List.map (Quad.view model.settings.separation)
             )
          , Svg.g []
             (Batcher.currentBatch model.quadBatcher
                 |> Array.toList
-                |> List.map Quad.view
+                |> List.map (Quad.view model.settings.separation)
             )
          ]
             ++ (Batcher.fullBatches model.quadBatcher
@@ -117,7 +217,7 @@ view (Model model) =
                                     Svg.g []
                                         (batch
                                             |> Array.toList
-                                            |> List.map Quad.view
+                                            |> List.map (Quad.view model.settings.separation)
                                         )
                                 )
                                 idx

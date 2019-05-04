@@ -5,7 +5,7 @@ import Browser.Navigation as Navigation
 import Element
 import Element.Font as Font
 import Menu
-import Page.Home
+import Page.Home as Home
 import Page.QuadDivision as QuadDivision
 import Route exposing (Route)
 import Url exposing (Url)
@@ -19,7 +19,7 @@ type alias Model =
 
 
 type PageModel
-    = Home
+    = Home Home.Model
     | QuadDivision QuadDivision.Model
 
 
@@ -28,7 +28,7 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | GoToRoute Route
     | MenuMsg Menu.Msg
-    | HomeMsg Page.Home.Msg
+    | HomeMsg Home.Msg
     | QuadDivisionMsg QuadDivision.Msg
 
 
@@ -60,8 +60,12 @@ update msg model =
         ( MenuMsg menuMsg, _ ) ->
             ( { model | menu = Menu.update menuMsg model.menu }, Cmd.none )
 
-        ( HomeMsg _, Home ) ->
-            ( model, Cmd.none )
+        ( HomeMsg subMsg, Home pageModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Home.update subMsg pageModel
+            in
+            ( { model | page = Home newModel }, Cmd.map HomeMsg cmd )
 
         ( HomeMsg _, _ ) ->
             ( model, Cmd.none )
@@ -87,10 +91,10 @@ view model =
     let
         pageDocument =
             case model.page of
-                Home ->
+                Home pageModel ->
                     let
                         { title, body } =
-                            Page.Home.view
+                            Home.view pageModel
                     in
                     { title = title
                     , body = Element.map HomeMsg body
@@ -109,7 +113,7 @@ view model =
     , body =
         [ Element.layout
             [ Font.family
-                [ Font.sansSerif
+                [ Font.typeface "Arial"
                 ]
             , Element.inFront (Element.map MenuMsg <| Menu.view { pageTitle = pageDocument.title } model.menu)
             ]
@@ -130,8 +134,8 @@ subscriptions model =
     let
         pageSubscriptions =
             case model.page of
-                Home ->
-                    Sub.none
+                Home pageModel ->
+                    Sub.map HomeMsg (Home.subscriptions pageModel)
 
                 QuadDivision pageModel ->
                     Sub.map QuadDivisionMsg (QuadDivision.subscriptions pageModel)
@@ -182,7 +186,11 @@ initPageFromUrl : Url -> ( PageModel, Cmd Msg )
 initPageFromUrl url =
     case Route.parseUrl url of
         Route.Home ->
-            ( Home, Cmd.none )
+            let
+                ( model, cmd ) =
+                    Home.init
+            in
+            ( Home model, Cmd.map HomeMsg cmd )
 
         Route.QuadDivision ->
             let

@@ -46,12 +46,16 @@ view { pageTitle } (Menu { starting }) =
         , style "transform-origin" "top left"
         , style "transition" "transform 1s ease"
         ]
-        [ Element.el
-            [ Font.bold
-            , Font.size 25
-            ]
-          <|
-            Element.text "danmarcab.com"
+        [ Element.link []
+            { url = "/"
+            , label =
+                Element.el
+                    [ Font.bold
+                    , Font.size 25
+                    ]
+                <|
+                    Element.text "danmarcab.com"
+            }
         , divider
         , Element.el
             [ Font.bold
@@ -80,5 +84,5 @@ style key val =
 init : ( Model, Cmd Msg )
 init =
     ( Menu { starting = True }
-    , Task.perform (\() -> Started) (Process.sleep 5000)
+    , Task.perform (\() -> Started) (Process.sleep 1000)
     )

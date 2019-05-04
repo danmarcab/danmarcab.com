@@ -1,9 +1,6 @@
 module Art.QuadDivision.Quad exposing (Quad, canSubdivide, initialQuadGenerator, subdivide, view)
 
-import Axis2d
-import Direction2d
 import Geometry.Svg as GeoSvg
-import LineSegment2d
 import Point2d exposing (Point2d)
 import Polygon2d exposing (Polygon2d)
 import Random
@@ -24,49 +21,50 @@ type DivideType
     | Horizontal
 
 
-canSubdivide : Float -> Quad -> Bool
-canSubdivide separation { polygon } =
+canSubdivide :
+    { separation : Float, minSide : Float, minArea : Float }
+    -> Quad
+    -> Bool
+canSubdivide opts quad =
+    case howCanSubdivide opts quad of
+        NotPossible ->
+            False
+
+        CanDivideHorizontally ->
+            True
+
+        CanDivideVertically ->
+            True
+
+        CanDivideBoth ->
+            True
+
+
+type SubdivisionOption
+    = NotPossible
+    | CanDivideHorizontally
+    | CanDivideVertically
+    | CanDivideBoth
+
+
+howCanSubdivide :
+    { separation : Float, minSide : Float, minArea : Float }
+    -> Quad
+    -> SubdivisionOption
+howCanSubdivide { minSide, minArea } { polygon } =
     case Polygon2d.outerLoop polygon of
         [ p1, p2, p3, p4 ] ->
             let
                 bigEnough =
                     Polygon2d.area polygon
-                        > (500 * separation * separation)
+                        > minArea
 
                 longEnough pp1 pp2 =
                     (Vector2d.from pp1 pp2
                         |> Vector2d.length
                     )
-                        > (20 * separation)
+                        > minSide
 
-                canCutHorizontal =
-                    longEnough p2 p3 && longEnough p4 p1
-
-                canCutVertical =
-                    longEnough p1 p2 && longEnough p3 p4
-            in
-            bigEnough && (canCutHorizontal || canCutVertical)
-
-        _ ->
-            False
-
-
-subdivide : Random.Seed -> Float -> Quad -> ( Random.Seed, List Quad )
-subdivide seed separation ({ polygon, prevDivide } as quad) =
-    let
-        bigEnough =
-            Polygon2d.area polygon
-                > (100 * separation * separation)
-
-        longEnough p1 p2 =
-            (Vector2d.from p1 p2
-                |> Vector2d.length
-            )
-                > (10 * separation)
-    in
-    case Polygon2d.outerLoop polygon of
-        [ p1, p2, p3, p4 ] ->
-            let
                 canCutHorizontal =
                     longEnough p2 p3 && longEnough p4 p1
 
@@ -75,86 +73,122 @@ subdivide seed separation ({ polygon, prevDivide } as quad) =
             in
             case ( bigEnough, canCutHorizontal, canCutVertical ) of
                 ( False, _, _ ) ->
-                    ( seed, [ quad ] )
-
-                ( True, True, True ) ->
-                    let
-                        ( divideType, newSeed1 ) =
-                            Random.step (divideTypeGenerator prevDivide) seed
-                    in
-                    case divideType of
-                        Horizontal ->
-                            splitHorizontal newSeed1 separation quad
-
-                        Vertical ->
-                            splitVertical newSeed1 separation quad
-
-                ( True, True, False ) ->
-                    splitHorizontal seed separation quad
-
-                ( True, False, True ) ->
-                    splitVertical seed separation quad
+                    NotPossible
 
                 ( True, False, False ) ->
-                    ( seed, [ quad ] )
+                    NotPossible
+
+                ( True, True, False ) ->
+                    CanDivideHorizontally
+
+                ( True, False, True ) ->
+                    CanDivideVertically
+
+                ( True, True, True ) ->
+                    CanDivideBoth
 
         _ ->
+            NotPossible
+
+
+subdivide :
+    Random.Seed
+    -> { separation : Float, minSide : Float, minArea : Float }
+    -> Quad
+    -> ( Random.Seed, List Quad )
+subdivide seed opts ({ prevDivide } as quad) =
+    case howCanSubdivide opts quad of
+        NotPossible ->
             ( seed, [ quad ] )
 
+        CanDivideHorizontally ->
+            splitHorizontal seed quad
 
-colorGenerator : Random.Generator String
-colorGenerator =
-    Random.uniform "#e8b0b0"
-        [ "#e8cbb0"
-        , "#e6e8b0"
-        , "#bee8b0"
-        , "#b0e8de"
-        , "#b0cae8"
-        , "#b6b0e8"
-        , "#ddb0e8"
-        , "#e8b0d5"
-        ]
+        CanDivideVertically ->
+            splitVertical seed quad
 
+        CanDivideBoth ->
+            let
+                ( divideType, newSeed1 ) =
+                    Random.step (divideTypeGenerator prevDivide) seed
+            in
+            case divideType of
+                Horizontal ->
+                    splitHorizontal newSeed1 quad
 
-view : Quad -> Svg Never
-view { polygon, color } =
-    GeoSvg.polygon2d
-        [ Svg.Attributes.fill color
-        ]
-        polygon
+                Vertical ->
+                    splitVertical newSeed1 quad
 
 
-splitHorizontal : Random.Seed -> Float -> Quad -> ( Random.Seed, List Quad )
-splitHorizontal seed separation { polygon, color } =
+splitHorizontal : Random.Seed -> Quad -> ( Random.Seed, List Quad )
+splitHorizontal seed { polygon } =
     case Polygon2d.outerLoop polygon of
         [ p1, p2, p3, p4 ] ->
-            let
-                ( newSeed1, cutOff1 ) =
-                    cutOff seed p2 p3
-
-                ( newSeed2, cutOff2 ) =
-                    cutOff newSeed1 p4 p1
-
-                ( ( cutOff1a, cutOff1b ), ( cutOff2a, cutOff2b ) ) =
-                    separate separation p1 p2 cutOff1 cutOff2
-
-                ( ( color1, color2 ), newSeed3 ) =
-                    Random.step (Random.pair colorGenerator colorGenerator) newSeed2
-            in
-            ( newSeed3
-            , [ { polygon = Polygon2d.singleLoop [ p1, p2, cutOff1a, cutOff2b ]
-                , color = color1
-                , prevDivide = Horizontal
-                }
-              , { polygon = Polygon2d.singleLoop [ cutOff2a, cutOff1b, p3, p4 ]
-                , color = color2
-                , prevDivide = Horizontal
-                }
-              ]
-            )
+            split
+                (\cutOff1 cutOff2 ->
+                    ( Horizontal
+                    , [ p1, p2, cutOff1, cutOff2 ]
+                    , [ cutOff2, cutOff1, p3, p4 ]
+                    )
+                )
+                ( p2, p3 )
+                ( p4, p1 )
+                seed
 
         _ ->
             ( seed, [] )
+
+
+splitVertical : Random.Seed -> Quad -> ( Random.Seed, List Quad )
+splitVertical seed { polygon } =
+    case Polygon2d.outerLoop polygon of
+        [ p1, p2, p3, p4 ] ->
+            split
+                (\cutOff1 cutOff2 ->
+                    ( Vertical
+                    , [ p1, cutOff1, cutOff2, p4 ]
+                    , [ cutOff1, p2, p3, cutOff2 ]
+                    )
+                )
+                ( p1, p2 )
+                ( p3, p4 )
+                seed
+
+        _ ->
+            ( seed, [] )
+
+
+split :
+    (Point2d -> Point2d -> ( DivideType, List Point2d, List Point2d ))
+    -> ( Point2d, Point2d )
+    -> ( Point2d, Point2d )
+    -> Random.Seed
+    -> ( Random.Seed, List Quad )
+split f ( p1, p2 ) ( p3, p4 ) seed =
+    let
+        ( newSeed1, cutOff1 ) =
+            cutOff seed p1 p2
+
+        ( newSeed2, cutOff2 ) =
+            cutOff newSeed1 p3 p4
+
+        ( ( color1, color2 ), newSeed3 ) =
+            Random.step (Random.pair colorGenerator colorGenerator) newSeed2
+
+        ( divideType, quad1, quad2 ) =
+            f cutOff1 cutOff2
+    in
+    ( newSeed3
+    , [ { polygon = Polygon2d.singleLoop quad1
+        , color = color1
+        , prevDivide = divideType
+        }
+      , { polygon = Polygon2d.singleLoop quad2
+        , color = color2
+        , prevDivide = divideType
+        }
+      ]
+    )
 
 
 cutOff : Random.Seed -> Point2d -> Point2d -> ( Random.Seed, Point2d )
@@ -171,83 +205,18 @@ cutOff seed p1 p2 =
     )
 
 
-splitVertical : Random.Seed -> Float -> Quad -> ( Random.Seed, List Quad )
-splitVertical seed separation { polygon, color } =
-    case Polygon2d.outerLoop polygon of
-        [ p1, p2, p3, p4 ] ->
-            let
-                ( newSeed1, cutOff1 ) =
-                    cutOff seed p1 p2
 
-                ( newSeed2, cutOff2 ) =
-                    cutOff newSeed1 p3 p4
-
-                ( ( cutOff1a, cutOff1b ), ( cutOff2a, cutOff2b ) ) =
-                    separate separation p4 p1 cutOff1 cutOff2
-            in
-            ( newSeed2
-            , [ { polygon = Polygon2d.singleLoop [ p1, cutOff1a, cutOff2b, p4 ]
-                , color = color
-                , prevDivide = Vertical
-                }
-              , { polygon = Polygon2d.singleLoop [ cutOff1b, p2, p3, cutOff2a ]
-                , color = color
-                , prevDivide = Vertical
-                }
-              ]
-            )
-
-        _ ->
-            ( seed, [] )
+-- VIEW
 
 
-separate : Float -> Point2d -> Point2d -> Point2d -> Point2d -> ( ( Point2d, Point2d ), ( Point2d, Point2d ) )
-separate separation p1 p2 c1 c2 =
-    let
-        default =
-            ( ( c1, c1 ), ( c2, c2 ) )
-    in
-    Maybe.andThen
-        (\cutDir ->
-            let
-                pushVect =
-                    Direction2d.perpendicularTo cutDir
-                        |> Direction2d.toVector
-                        |> Vector2d.scaleBy separation
-
-                pullVect =
-                    Vector2d.reverse pushVect
-
-                cutAxis =
-                    Axis2d.withDirection cutDir c1
-
-                pushedAxis =
-                    cutAxis
-                        |> Axis2d.translateBy pushVect
-
-                pulledAxis =
-                    cutAxis
-                        |> Axis2d.translateBy pullVect
-
-                lineP2C1 =
-                    LineSegment2d.from p2 c1
-                        |> LineSegment2d.scaleAbout p2 10
-
-                lineP1C2 =
-                    LineSegment2d.from p1 c2
-                        |> LineSegment2d.scaleAbout p1 10
-            in
-            Maybe.map4
-                (\c1a c1b c2a c2b ->
-                    ( ( c1a, c1b ), ( c2a, c2b ) )
-                )
-                (LineSegment2d.intersectionWithAxis pushedAxis lineP2C1)
-                (LineSegment2d.intersectionWithAxis pulledAxis lineP2C1)
-                (LineSegment2d.intersectionWithAxis pulledAxis lineP1C2)
-                (LineSegment2d.intersectionWithAxis pushedAxis lineP1C2)
-        )
-        (Direction2d.from c1 c2)
-        |> Maybe.withDefault default
+view : Float -> Quad -> Svg Never
+view separation { polygon, color } =
+    GeoSvg.polygon2d
+        [ Svg.Attributes.fill color
+        , Svg.Attributes.stroke "white"
+        , Svg.Attributes.strokeWidth (String.fromFloat separation)
+        ]
+        polygon
 
 
 
@@ -280,3 +249,17 @@ divideTypeGenerator prev =
 
         Horizontal ->
             Random.weighted ( 1, Horizontal ) [ ( 2, Vertical ) ]
+
+
+colorGenerator : Random.Generator String
+colorGenerator =
+    Random.uniform "#e8b0b0"
+        [ "#e8cbb0"
+        , "#e6e8b0"
+        , "#bee8b0"
+        , "#b0e8de"
+        , "#b0cae8"
+        , "#b6b0e8"
+        , "#ddb0e8"
+        , "#e8b0d5"
+        ]
