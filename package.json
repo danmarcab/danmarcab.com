@@ -21,6 +21,7 @@
     "elm-test": "^0.19.0",
     "node-elm-compiler": "^5.0.3",
     "parcel-bundler": "^1.12.0",
-    "parcel-plugin-static-files-copy": "^2.1.2"
+    "parcel-plugin-static-files-copy": "^2.1.2",
+    "parcel-plugin-text": "^0.9.5"
   }
 }

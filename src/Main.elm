@@ -2,12 +2,18 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Navigation
+import Data.PostList as PostList exposing (PostList)
 import Element
+import Element.Background as Background
 import Element.Font as Font
+import Json.Decode as JD
 import Menu
 import Page.Home as Home
+import Page.NotFound as NotFound
+import Page.Post as Post
 import Page.QuadDivision as QuadDivision
 import Route exposing (Route)
+import Style.Color as Color
 import Url exposing (Url)
 
 
@@ -15,12 +21,16 @@ type alias Model =
     { navKey : Navigation.Key
     , menu : Menu.Model
     , page : PageModel
+    , posts : PostList
+    , colorScheme : Color.Scheme
     }
 
 
 type PageModel
     = Home Home.Model
     | QuadDivision QuadDivision.Model
+    | Post Post.Model
+    | NotFound
 
 
 type Msg
@@ -29,6 +39,7 @@ type Msg
     | GoToRoute Route
     | MenuMsg Menu.Msg
     | HomeMsg Home.Msg
+    | PostMsg Post.Msg
     | QuadDivisionMsg QuadDivision.Msg
 
 
@@ -53,7 +64,7 @@ update msg model =
         ( NavigateTo url, _ ) ->
             let
                 ( page, cmd ) =
-                    initPageFromUrl url
+                    initPageFromUrl model.posts url
             in
             ( { model | page = page }, cmd )
 
@@ -77,6 +88,9 @@ update msg model =
             in
             ( { model | page = QuadDivision newModel }, Cmd.map QuadDivisionMsg cmd )
 
+        ( PostMsg _, _ ) ->
+            ( model, Cmd.none )
+
         ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
 
@@ -89,34 +103,65 @@ goToRoute navKey route =
 view : Model -> Browser.Document Msg
 view model =
     let
-        pageDocument =
+        ( showFloatingMenu, pageDocument ) =
             case model.page of
                 Home pageModel ->
                     let
                         { title, body } =
                             Home.view pageModel
                     in
-                    { title = title
-                    , body = Element.map HomeMsg body
-                    }
+                    ( True
+                    , { title = title
+                      , body = Element.map HomeMsg body
+                      }
+                    )
+
+                Post pageModel ->
+                    let
+                        { title, body } =
+                            Post.view { colorScheme = model.colorScheme } pageModel
+                    in
+                    ( False
+                    , { title = title
+                      , body = Element.map PostMsg body
+                      }
+                    )
 
                 QuadDivision pageModel ->
                     let
                         { title, body } =
                             QuadDivision.view pageModel
                     in
-                    { title = title
-                    , body = Element.map QuadDivisionMsg body
-                    }
+                    ( True
+                    , { title = title
+                      , body = Element.map QuadDivisionMsg body
+                      }
+                    )
+
+                NotFound ->
+                    ( True, NotFound.view )
+
+        attrs =
+            if showFloatingMenu then
+                [ Element.inFront
+                    (Element.map MenuMsg <|
+                        Menu.view { pageTitle = pageDocument.title } model.menu
+                    )
+                ]
+
+            else
+                []
     in
     { title = pageDocument.title ++ " - danmarcab.com"
     , body =
         [ Element.layout
-            [ Font.family
+            ([ Font.family
                 [ Font.typeface "Arial"
                 ]
-            , Element.inFront (Element.map MenuMsg <| Menu.view { pageTitle = pageDocument.title } model.menu)
-            ]
+             , Background.color (Color.background model.colorScheme)
+             ]
+                ++ attrs
+            )
           <|
             Element.el
                 [ Element.centerX
@@ -139,6 +184,12 @@ subscriptions model =
 
                 QuadDivision pageModel ->
                     Sub.map QuadDivisionMsg (QuadDivision.subscriptions pageModel)
+
+                Post pageModel ->
+                    Sub.map PostMsg (Post.subscriptions pageModel)
+
+                NotFound ->
+                    Sub.none
     in
     Sub.batch
         [ pageSubscriptions
@@ -150,14 +201,27 @@ init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
         ( page, cmd ) =
-            initPageFromUrl url
+            initPageFromUrl posts url
 
         ( menu, menuCmd ) =
             Menu.init
+
+        ( posts, errs ) =
+            case JD.decodeValue PostList.decoder flags.unparsedPosts of
+                Ok ( decodedPosts, [] ) ->
+                    ( decodedPosts, "" )
+
+                Ok ( decodedPosts, someErrors ) ->
+                    ( decodedPosts, "" )
+
+                Err someErrors ->
+                    ( PostList.empty, "" )
     in
     ( { navKey = navKey
       , menu = menu
       , page = page
+      , posts = posts
+      , colorScheme = Color.Light
       }
     , Cmd.batch
         [ cmd
@@ -167,7 +231,9 @@ init flags url navKey =
 
 
 type alias Flags =
-    ()
+    { showUnpublished : Bool
+    , unparsedPosts : JD.Value
+    }
 
 
 main : Program Flags Model Msg
@@ -182,8 +248,8 @@ main =
         }
 
 
-initPageFromUrl : Url -> ( PageModel, Cmd Msg )
-initPageFromUrl url =
+initPageFromUrl : PostList -> Url -> ( PageModel, Cmd Msg )
+initPageFromUrl posts url =
     case Route.parseUrl url of
         Route.Home ->
             let
@@ -192,9 +258,20 @@ initPageFromUrl url =
             in
             ( Home model, Cmd.map HomeMsg cmd )
 
+        Route.Post postId ->
+            case PostList.get postId posts of
+                Just post ->
+                    ( Post <| Post.init post, Cmd.none )
+
+                Nothing ->
+                    ( NotFound, Cmd.none )
+
         Route.QuadDivision ->
             let
                 ( model, cmd ) =
                     QuadDivision.init
             in
             ( QuadDivision model, Cmd.map QuadDivisionMsg cmd )
+
+        Route.NotFound ->
+            ( NotFound, Cmd.none )
