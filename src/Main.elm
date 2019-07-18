@@ -139,7 +139,7 @@ view model =
                     )
 
                 NotFound ->
-                    ( True, NotFound.view )
+                    ( False, NotFound.view { colorScheme = model.colorScheme } )
 
         attrs =
             if showFloatingMenu then
