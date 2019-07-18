@@ -1,0 +1,22 @@
+|> Post
+    title = Hello World!
+
+Hi there! It's me, Daniel, a London based software engineer, and for the nth time I am trying
+to start writing about things that interest me.
+
+|> Image
+    src = https://www.lifewire.com/thmb/hR2GPjS2ZUQBRv2CHCdPcIfBQZ0=/768x0/filters:no_upscale():max_bytes(150000):strip_icc()/sstMxMh-5ab00c7bfa6bcc003622e4f5.jpg
+    description = This time for real! (Note this was posted in 2019)
+
+The main subjects will be computing (programming languages, compilers, algorithms), generative art and who knows
+what else.
+
+These days I am excited with [Elm]{link| url=https://elm-lang.org/} (the reason I can touch frontend code after 8 years, this page is built with it)
+and I am keen on learning a bit of [rust]{link| url=https://www.rust-lang.org/}. As a good project
+I am thinking about writing a [CHIP8]{link| url=https://en.wikipedia.org/wiki/CHIP-8} emulator.
+
+I will try to make posts concise and didactic, after all they say you only understand something
+if you can teach it. Test me!
+
+Stay tuned for more.
+

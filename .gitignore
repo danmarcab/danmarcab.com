@@ -9,3 +9,6 @@ node_modules
 .cache
 # parcel generated files
 dist
+
+# test post
+posts/__test__post__.txt
