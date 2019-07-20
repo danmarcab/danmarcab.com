@@ -1,7 +1,7 @@
 module Data.Post exposing
     ( Post
     , Status(..)
-    , Tag(..)
+    , Tag
     , dateSorter
     , fromFileAndMarkup
     , isPublished
@@ -23,6 +23,7 @@ type alias Date =
 type alias Post =
     { id : String
     , title : String
+    , abstract : String
     , created : Date
     , status : Status
     , tags : List Tag
@@ -39,8 +40,8 @@ type Status
     | Published Date
 
 
-type Tag
-    = Elm
+type alias Tag =
+    String
 
 
 type alias FileName =
@@ -62,9 +63,10 @@ document id =
         (\meta contentBlocks ->
             { id = id
             , title = meta.title
+            , abstract = "This is dummy text to check how the abstract looks. This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks."
             , created = ( 2019, 3, 9 )
-            , status = Draft
-            , tags = []
+            , status = Published ( 2019, 3, 9 )
+            , tags = [ "Elm", "Rust" ]
             , content =
                 \colorScheme ->
                     Element.textColumn
@@ -74,8 +76,6 @@ document id =
                             , Font.sansSerif
                             ]
                         , Element.width Element.fill
-
-                        --                        , Element.spacing 40
                         ]
                         (List.map (\b -> b colorScheme)
                             contentBlocks
@@ -160,7 +160,6 @@ header =
                 [ Font.size 24
                 , Element.spacing 12
                 , Font.bold
-                , Font.color (Color.contentFont colorScheme)
                 , Element.paddingEach { top = 0, bottom = 20, right = 0, left = 0 }
                 ]
                 [ Element.text headerText ]

@@ -20,7 +20,7 @@ view { colorScheme } { pageTitle, contentView } =
             }
         , Element.height Element.fill
         , Background.color (Color.contentBackground colorScheme)
-        , Font.color (Color.contentFont colorScheme)
+        , Font.color (Color.text colorScheme)
         ]
         [ menuView { colorScheme = colorScheme } pageTitle
         , contentView

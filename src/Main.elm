@@ -108,9 +108,9 @@ view model =
                 Home pageModel ->
                     let
                         { title, body } =
-                            Home.view pageModel
+                            Home.view { colorScheme = model.colorScheme } model.posts pageModel
                     in
-                    ( True
+                    ( False
                     , { title = title
                       , body = Element.map HomeMsg body
                       }
