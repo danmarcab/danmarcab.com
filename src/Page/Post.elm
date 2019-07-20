@@ -1,10 +1,7 @@
 module Page.Post exposing (Model, Msg, init, subscriptions, update, view)
 
-import Data.Post as Post exposing (Post)
-import Element exposing (Attribute, Element)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
+import Data.Post exposing (Post)
+import Element exposing (Element)
 import Layout.Page
 import Style.Color as Color
 
@@ -14,8 +11,8 @@ type alias Model =
     }
 
 
-type Msg
-    = NoOp
+type alias Msg =
+    ()
 
 
 init : Post -> Model
@@ -25,7 +22,7 @@ init post =
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
-update msg model =
+update () model =
     ( model, Cmd.none )
 
 
@@ -56,5 +53,5 @@ contentView { colorScheme } model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
