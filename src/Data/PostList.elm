@@ -12,6 +12,7 @@ import Data.Post as Post exposing (Post)
 import Json.Decode as JD exposing (Decoder)
 import Mark
 import Mark.Error
+import Time
 
 
 type PostList
@@ -44,28 +45,6 @@ filter f (PostList postList) =
         |> PostList
 
 
-fromPostList : List Post -> ( PostList, List Error )
-fromPostList posts =
-    let
-        sortedPosts =
-            posts
-                |> List.sortWith Post.dateSorter
-
-        sameIdErrorMsg p1 p2 =
-            "Posts with titles: " ++ p1.title ++ " , and " ++ p2.title ++ " both have the same id: " ++ p1.id
-
-        step post ( postList, errors ) =
-            case AssocList.get post.id postList of
-                Just postWithSameId ->
-                    ( postList, errors ++ [ sameIdErrorMsg post postWithSameId ] )
-
-                Nothing ->
-                    ( AssocList.insert post.id post postList, errors )
-    in
-    List.foldl step ( AssocList.empty, [] ) sortedPosts
-        |> Tuple.mapFirst PostList
-
-
 decoder : Decoder ( PostList, List Error )
 decoder =
     JD.keyValuePairs JD.string
@@ -90,5 +69,14 @@ decoder =
                             ( AssocList.empty, [] )
                             kvPairs
                 in
-                JD.succeed ( PostList posts, errors )
+                JD.succeed ( PostList posts |> sort, errors )
             )
+
+
+sort : PostList -> PostList
+sort (PostList postList) =
+    postList
+        |> AssocList.toList
+        |> List.sortBy (\( id, post ) -> Time.posixToMillis post.publishedDate)
+        |> AssocList.fromList
+        |> PostList

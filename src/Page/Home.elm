@@ -8,6 +8,7 @@ import Element.Font as Font
 import Layout.Page
 import Route exposing (Route)
 import Style.Color as Color
+import Time exposing (Month(..))
 
 
 type alias Model =
@@ -127,8 +128,43 @@ postPreview { colorScheme } post =
                 , Font.color (Color.secondaryText colorScheme)
                 ]
                 [ let
-                    ( y, m, d ) =
-                        post.publishedDate
+                    monthToString month =
+                        case month of
+                            Jan ->
+                                "Jan"
+
+                            Feb ->
+                                "Feb"
+
+                            Mar ->
+                                "Mar"
+
+                            Apr ->
+                                "Apr"
+
+                            May ->
+                                "May"
+
+                            Jun ->
+                                "Jun"
+
+                            Jul ->
+                                "Jul"
+
+                            Aug ->
+                                "Aug"
+
+                            Sep ->
+                                "Sep"
+
+                            Oct ->
+                                "Oct"
+
+                            Nov ->
+                                "Nov"
+
+                            Dec ->
+                                "Dec"
 
                     startText =
                         if post.published then
@@ -139,8 +175,11 @@ postPreview { colorScheme } post =
                   in
                   Element.text <|
                     startText
-                        ++ String.join "/"
-                            [ String.fromInt d, String.fromInt m, String.fromInt y ]
+                        ++ String.join " "
+                            [ String.fromInt <| Time.toDay Time.utc post.publishedDate
+                            , monthToString <| Time.toMonth Time.utc post.publishedDate
+                            , String.fromInt <| Time.toYear Time.utc post.publishedDate
+                            ]
                 , Element.row [ Element.spacing 5 ]
                     (List.map
                         (\tag ->

@@ -1,7 +1,6 @@
 module Data.Post exposing
     ( Post
     , Tag
-    , dateSorter
     , fromFileAndMarkup
     )
 
@@ -9,9 +8,11 @@ import Element exposing (Element)
 import Element.Background as Background
 import Element.Font as Font
 import Html
+import Iso8601
 import Mark
 import Mark.Error
 import Style.Color as Color
+import Time
 
 
 type alias Date =
@@ -22,7 +23,7 @@ type alias Post =
     { id : String
     , title : String
     , abstract : String
-    , publishedDate : Date
+    , publishedDate : Time.Posix
     , published : Bool
     , tags : List Tag
     , content : Color.Scheme -> Element Never
@@ -57,7 +58,7 @@ document id =
             { id = id
             , title = meta.title
             , abstract = meta.abstract
-            , publishedDate = ( 2019, 3, 9 )
+            , publishedDate = meta.publishedDate
             , published = meta.published
             , tags = meta.tags
             , content =
@@ -97,18 +98,42 @@ document id =
 
 metadata =
     Mark.record "Post"
-        (\title abstract published tags ->
+        (\title abstract publishedDate published tags ->
             { title = title
             , abstract = abstract
+            , publishedDate = publishedDate
             , published = published
             , tags = tags
             }
         )
         |> Mark.field "title" Mark.string
         |> Mark.field "abstract" Mark.string
+        |> Mark.field "publishedDate" date
         |> Mark.field "published" Mark.bool
         |> Mark.field "tags" (Mark.map (String.split ", ") Mark.string)
         |> Mark.toBlock
+
+
+date : Mark.Block Time.Posix
+date =
+    Mark.verify
+        (\str ->
+            str
+                |> Iso8601.toTime
+                |> Result.mapError
+                    (\_ -> illformatedDateMessage)
+        )
+        Mark.string
+
+
+illformatedDateMessage =
+    { title = "Bad Date"
+    , message =
+        [ "I was trying to parse a date, but this format looks off.\n\n"
+        , "Dates should be in ISO 8601 format:\n\n"
+        , "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        ]
+    }
 
 
 text : Mark.Block (List (Color.Scheme -> Element msg))
@@ -206,8 +231,3 @@ image =
         |> Mark.field "src" Mark.string
         |> Mark.field "description" Mark.string
         |> Mark.toBlock
-
-
-dateSorter : Post -> Post -> Order
-dateSorter post1 post2 =
-    compare post1.publishedDate post2.publishedDate
