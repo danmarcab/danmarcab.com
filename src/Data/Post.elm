@@ -1,19 +1,18 @@
 module Data.Post exposing
     ( Post
-    , Status(..)
-    , Tag(..)
-    , dateSorter
+    , Tag
     , fromFileAndMarkup
-    , isPublished
     )
 
 import Element exposing (Element)
 import Element.Background as Background
 import Element.Font as Font
 import Html
+import Iso8601
 import Mark
 import Mark.Error
 import Style.Color as Color
+import Time
 
 
 type alias Date =
@@ -23,8 +22,9 @@ type alias Date =
 type alias Post =
     { id : String
     , title : String
-    , created : Date
-    , status : Status
+    , abstract : String
+    , publishedDate : Time.Posix
+    , published : Bool
     , tags : List Tag
     , content : Color.Scheme -> Element Never
     }
@@ -34,13 +34,8 @@ type Content
     = Text String
 
 
-type Status
-    = Draft
-    | Published Date
-
-
-type Tag
-    = Elm
+type alias Tag =
+    String
 
 
 type alias FileName =
@@ -62,9 +57,10 @@ document id =
         (\meta contentBlocks ->
             { id = id
             , title = meta.title
-            , created = ( 2019, 3, 9 )
-            , status = Draft
-            , tags = []
+            , abstract = meta.abstract
+            , publishedDate = meta.publishedDate
+            , published = meta.published
+            , tags = meta.tags
             , content =
                 \colorScheme ->
                     Element.textColumn
@@ -74,8 +70,6 @@ document id =
                             , Font.sansSerif
                             ]
                         , Element.width Element.fill
-
-                        --                        , Element.spacing 40
                         ]
                         (List.map (\b -> b colorScheme)
                             contentBlocks
@@ -104,12 +98,42 @@ document id =
 
 metadata =
     Mark.record "Post"
-        (\title ->
+        (\title abstract publishedDate published tags ->
             { title = title
+            , abstract = abstract
+            , publishedDate = publishedDate
+            , published = published
+            , tags = tags
             }
         )
         |> Mark.field "title" Mark.string
+        |> Mark.field "abstract" Mark.string
+        |> Mark.field "publishedDate" date
+        |> Mark.field "published" Mark.bool
+        |> Mark.field "tags" (Mark.map (String.split ", ") Mark.string)
         |> Mark.toBlock
+
+
+date : Mark.Block Time.Posix
+date =
+    Mark.verify
+        (\str ->
+            str
+                |> Iso8601.toTime
+                |> Result.mapError
+                    (\_ -> illformatedDateMessage)
+        )
+        Mark.string
+
+
+illformatedDateMessage =
+    { title = "Bad Date"
+    , message =
+        [ "I was trying to parse a date, but this format looks off.\n\n"
+        , "Dates should be in ISO 8601 format:\n\n"
+        , "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        ]
+    }
 
 
 text : Mark.Block (List (Color.Scheme -> Element msg))
@@ -160,7 +184,6 @@ header =
                 [ Font.size 24
                 , Element.spacing 12
                 , Font.bold
-                , Font.color (Color.contentFont colorScheme)
                 , Element.paddingEach { top = 0, bottom = 20, right = 0, left = 0 }
                 ]
                 [ Element.text headerText ]
@@ -208,34 +231,3 @@ image =
         |> Mark.field "src" Mark.string
         |> Mark.field "description" Mark.string
         |> Mark.toBlock
-
-
-isPublished : Post -> Bool
-isPublished post =
-    case post.status of
-        Draft ->
-            False
-
-        Published _ ->
-            True
-
-
-dateSorter : Post -> Post -> Order
-dateSorter post1 post2 =
-    case ( post1.status, post2.status ) of
-        ( Published published1, Published published2 ) ->
-            case compare published1 published2 of
-                EQ ->
-                    compare post1.created post2.created
-
-                other ->
-                    other
-
-        ( Published published1, Draft ) ->
-            compare published1 post2.created
-
-        ( Draft, Published published2 ) ->
-            compare post1.created published2
-
-        ( Draft, Draft ) ->
-            compare post1.created post2.created

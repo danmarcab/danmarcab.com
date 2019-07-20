@@ -1,144 +1,224 @@
 module Page.Home exposing (Model, Msg, init, subscriptions, update, view)
 
-import Art.QuadDivision as QuadDivision
-import Browser.Dom exposing (Viewport)
+import Data.Post as Post exposing (Post)
+import Data.PostList as PostList exposing (PostList)
 import Element exposing (Element)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Html.Attributes
-import Random
-import Task
+import Layout.Page
+import Route exposing (Route)
+import Style.Color as Color
+import Time exposing (Month(..))
 
 
-type Model
-    = Initial
-    | Started QuadDivision.Model
+type alias Model =
+    {}
 
 
 type Msg
-    = Resized
-    | InitSeed Int
-    | Initialize Int Viewport
+    = NoOp
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Initial
-    , Random.generate InitSeed anyInt
+    ( {}
+    , Cmd.none
     )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( Resized, _ ) ->
-            ( model, Random.generate InitSeed anyInt )
-
-        ( InitSeed seed, _ ) ->
-            ( Initial
-            , Task.perform (Initialize seed) Browser.Dom.getViewport
-            )
-
-        ( Initialize seed viewport, _ ) ->
-            ( Started <|
-                QuadDivision.generate
-                    { initialSeed = seed
-                    , viewport = viewport
-                    , settings = QuadDivision.defaultSettings viewport
-                    }
-            , Cmd.none
-            )
+    case msg of
+        NoOp ->
+            ( model, Cmd.none )
 
 
-view : Model -> { title : String, body : Element Msg }
-view model =
+view : { colorScheme : Color.Scheme } -> PostList -> Model -> { title : String, body : Element Msg }
+view { colorScheme } posts model =
     { title = "Home"
     , body =
-        case model of
-            Started quadDivision ->
-                Element.el
-                    [ Element.width Element.fill
-                    , Element.height Element.fill
-                    , Element.inFront menuView
-                    ]
-                <|
-                    Element.map never <|
-                        Element.html (QuadDivision.view quadDivision)
-
-            Initial ->
-                Element.none
+        Layout.Page.view { colorScheme = colorScheme }
+            { pageTitle = "Home"
+            , contentView = contentView { colorScheme = colorScheme } posts model
+            }
     }
 
 
-menuView =
-    let
-        starting =
-            False
-    in
+contentView : { colorScheme : Color.Scheme } -> PostList -> Model -> Element Msg
+contentView { colorScheme } posts model =
     Element.column
-        [ Element.centerX
-        , Element.centerY
-        , Element.paddingXY 20 20
-        , Background.color (Element.rgba255 0 0 0 0.9)
-        , Font.color (Element.rgba255 255 255 255 1)
+        [ Element.height Element.fill
+        , Element.width Element.fill
+        , Element.paddingXY 40 20
         , Border.roundEach { topLeft = 10, topRight = 10, bottomLeft = 10, bottomRight = 10 }
         , Element.spacing 20
-        , Element.width (Element.fill |> Element.maximum 1000)
-        , style "transform"
-            (if starting then
-                "scale(1.25)"
-
-             else
-                "scale(1)"
-            )
-        , style "transition" "transform 1s ease"
         ]
-        [ Element.paragraph [ Font.size 25 ] [ Element.text "Welcome to danmarcab.com!" ]
-        , Element.paragraph [ Font.size 20 ] [ Element.text "Here I will publish my blog and experiments about generative art and computer science (functional programming, compilers and more)." ]
-        , Element.paragraph [ Font.size 20 ] [ Element.text "Right now, there is not much to see, but I hope to upload more stuff soon!" ]
-        , cardView { url = "/quad-division", title = "Quad Division", imageUrl = "/images/quad-division.svg" }
+        [ Element.paragraph [ Font.size 20 ]
+            [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
+            ]
+        , Element.row
+            [ Element.width Element.fill
+            , Element.spacing 40
+            ]
+            [ postsView { colorScheme = colorScheme } posts
+            , experimentsView { colorScheme = colorScheme }
+            ]
         ]
 
 
-cardView : { url : String, title : String, imageUrl : String } -> Element msg
-cardView { url, title, imageUrl } =
-    Element.link []
-        { url = url
-        , label =
-            Element.column
-                [ Element.padding 10
-                , Background.color (Element.rgba255 255 255 255 0.2)
-                , Element.spacing 10
-                ]
-                [ Element.el
-                    [ Element.width (Element.px 200)
-                    , Element.height (Element.px 100)
-                    , Element.clip
-                    ]
-                  <|
-                    Element.image
-                        []
-                        { src = imageUrl, description = title }
-                , Element.el [ Element.centerX ] <| Element.text title
-                ]
-        }
+postsView : { colorScheme : Color.Scheme } -> PostList -> Element msg
+postsView { colorScheme } posts =
+    Element.column
+        [ Element.spacing 20
+        , Element.alignTop
+        , Element.width (Element.fillPortion 2)
+        ]
+        [ header { colorScheme = colorScheme } "Posts"
+        , Element.column [ Element.spacing 30 ] <|
+            PostList.map (postPreview { colorScheme = colorScheme }) posts
+        ]
 
 
-style : String -> String -> Element.Attribute msg
-style key val =
-    Element.htmlAttribute (Html.Attributes.style key val)
+experimentsView : { colorScheme : Color.Scheme } -> Element msg
+experimentsView { colorScheme } =
+    Element.column
+        [ Element.spacing 20
+        , Element.alignTop
+        , Element.width (Element.fillPortion 1)
+        ]
+        [ header { colorScheme = colorScheme } "Experiments"
+        , Element.paragraph [] [ Element.text "Coming soon..." ]
+        ]
+
+
+header : { colorScheme : Color.Scheme } -> String -> Element msg
+header { colorScheme } text =
+    Element.el
+        [ Border.widthEach { top = 0, bottom = 2, left = 0, right = 0 }
+        , Border.color (Color.contentBorder colorScheme)
+        , Element.width Element.fill
+        , Element.paddingXY 0 5
+        ]
+    <|
+        Element.paragraph
+            [ Font.size 30
+            , Font.bold
+            ]
+            [ Element.text text ]
+
+
+postPreview : { colorScheme : Color.Scheme } -> Post -> Element msg
+postPreview { colorScheme } post =
+    Element.column
+        [ Element.spacing 10
+        , Element.width Element.fill
+        ]
+        [ Element.column
+            [ Element.spacing 5
+            , Element.width Element.fill
+            ]
+            [ Element.link []
+                { url = Route.toUrlString (Route.Post post.id)
+                , label = postHeader { colorScheme = colorScheme } post.title
+                }
+            , Element.row
+                [ Element.spacing 20
+                , Font.size 16
+                , Element.width Element.fill
+                , Font.color (Color.secondaryText colorScheme)
+                ]
+                [ let
+                    monthToString month =
+                        case month of
+                            Jan ->
+                                "Jan"
+
+                            Feb ->
+                                "Feb"
+
+                            Mar ->
+                                "Mar"
+
+                            Apr ->
+                                "Apr"
+
+                            May ->
+                                "May"
+
+                            Jun ->
+                                "Jun"
+
+                            Jul ->
+                                "Jul"
+
+                            Aug ->
+                                "Aug"
+
+                            Sep ->
+                                "Sep"
+
+                            Oct ->
+                                "Oct"
+
+                            Nov ->
+                                "Nov"
+
+                            Dec ->
+                                "Dec"
+
+                    startText =
+                        if post.published then
+                            "Published on "
+
+                        else
+                            "DRAFT!! To be published on "
+                  in
+                  Element.text <|
+                    startText
+                        ++ String.join " "
+                            [ String.fromInt <| Time.toDay Time.utc post.publishedDate
+                            , monthToString <| Time.toMonth Time.utc post.publishedDate
+                            , String.fromInt <| Time.toYear Time.utc post.publishedDate
+                            ]
+                , Element.row [ Element.spacing 5 ]
+                    (List.map
+                        (\tag ->
+                            Element.el
+                                [ Font.color (Color.primary colorScheme)
+                                ]
+                            <|
+                                Element.text tag
+                        )
+                        post.tags
+                        |> List.intersperse (Element.text "|")
+                    )
+                ]
+            ]
+        , Element.column [ Element.spacing 10 ]
+            [ Element.paragraph [ Font.size 20 ] [ Element.text post.abstract ]
+            , Element.link []
+                { url = Route.toUrlString (Route.Post post.id)
+                , label =
+                    Element.el
+                        [ Font.color (Color.primary colorScheme)
+                        ]
+                    <|
+                        Element.text "Read more >>"
+                }
+            ]
+        ]
+
+
+postHeader : { colorScheme : Color.Scheme } -> String -> Element msg
+postHeader { colorScheme } text =
+    Element.paragraph
+        [ Font.size 26
+        , Font.bold
+        , Font.color (Color.primary colorScheme)
+        ]
+        [ Element.text text ]
 
 
 subscriptions : Model -> Sub Msg
-subscriptions fullModel =
+subscriptions model =
     Sub.none
-
-
-
--- RANDOM GENERATORS
-
-
-anyInt : Random.Generator Int
-anyInt =
-    Random.int Random.minInt Random.maxInt

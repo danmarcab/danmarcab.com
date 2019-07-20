@@ -108,9 +108,9 @@ view model =
                 Home pageModel ->
                     let
                         { title, body } =
-                            Home.view pageModel
+                            Home.view { colorScheme = model.colorScheme } model.posts pageModel
                     in
-                    ( True
+                    ( False
                     , { title = title
                       , body = Element.map HomeMsg body
                       }
@@ -139,7 +139,7 @@ view model =
                     )
 
                 NotFound ->
-                    ( True, NotFound.view )
+                    ( False, NotFound.view { colorScheme = model.colorScheme } )
 
         attrs =
             if showFloatingMenu then
@@ -220,7 +220,12 @@ init flags url navKey =
     ( { navKey = navKey
       , menu = menu
       , page = page
-      , posts = posts
+      , posts =
+            if flags.showUnpublished then
+                posts
+
+            else
+                PostList.filter .published posts
       , colorScheme = Color.Light
       }
     , Cmd.batch

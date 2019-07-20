@@ -5,6 +5,7 @@ import Element exposing (Attribute, Element)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Layout.Page
 import Style.Color as Color
 
 
@@ -36,64 +37,11 @@ view : { colorScheme : Color.Scheme } -> Model -> { title : String, body : Eleme
 view { colorScheme } model =
     { title = model.post.title
     , body =
-        Element.column
-            [ Element.width (Element.px 1000)
-            , Element.centerX
-            , Border.shadow
-                { blur = 5
-                , color = Color.contentBorder colorScheme
-                , offset = ( 0, 0 )
-                , size = 0
-                }
-            , Element.height Element.fill
-            , Background.color (Color.contentBackground colorScheme)
-            , Font.color (Color.contentFont colorScheme)
-            ]
-            [ menuView { colorScheme = colorScheme } model
-            , contentView { colorScheme = colorScheme } model
-            ]
-    }
-
-
-menuView : { colorScheme : Color.Scheme } -> Model -> Element Msg
-menuView { colorScheme } model =
-    Element.row
-        [ Element.alignTop
-        , Element.alignLeft
-        , Element.paddingXY 20 10
-        , Background.color (Color.primary colorScheme)
-        , Font.color Color.white
-        , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 0, bottomRight = 10 }
-        , Element.spacing 20
-        ]
-        [ Element.link []
-            { url = "/"
-            , label =
-                Element.el
-                    [ Font.bold
-                    , Font.size 25
-                    ]
-                <|
-                    Element.text "danmarcab.com"
+        Layout.Page.view { colorScheme = colorScheme }
+            { pageTitle = model.post.title
+            , contentView = contentView { colorScheme = colorScheme } model
             }
-        , divider
-        , Element.el
-            [ Font.bold
-            , Font.size 25
-            ]
-          <|
-            Element.text model.post.title
-        ]
-
-
-divider : Element Msg
-divider =
-    Element.el
-        [ Border.color Color.white
-        , Border.width 1
-        , Element.height Element.fill
-        ]
-        Element.none
+    }
 
 
 contentView : { colorScheme : Color.Scheme } -> Model -> Element Msg
