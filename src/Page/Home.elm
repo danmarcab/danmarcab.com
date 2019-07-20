@@ -1,12 +1,12 @@
 module Page.Home exposing (Model, Msg, init, subscriptions, update, view)
 
-import Data.Post as Post exposing (Post)
+import Data.Post exposing (Post)
 import Data.PostList as PostList exposing (PostList)
 import Element exposing (Element)
 import Element.Border as Border
 import Element.Font as Font
 import Layout.Page
-import Route exposing (Route)
+import Route
 import Style.Color as Color
 import Time exposing (Month(..))
 
@@ -15,8 +15,8 @@ type alias Model =
     {}
 
 
-type Msg
-    = NoOp
+type alias Msg =
+    ()
 
 
 init : ( Model, Cmd Msg )
@@ -27,10 +27,8 @@ init =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NoOp ->
-            ( model, Cmd.none )
+update () model =
+    ( model, Cmd.none )
 
 
 view : { colorScheme : Color.Scheme } -> PostList -> Model -> { title : String, body : Element Msg }
@@ -45,7 +43,7 @@ view { colorScheme } posts model =
 
 
 contentView : { colorScheme : Color.Scheme } -> PostList -> Model -> Element Msg
-contentView { colorScheme } posts model =
+contentView { colorScheme } posts _ =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
@@ -220,5 +218,5 @@ postHeader { colorScheme } text =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none

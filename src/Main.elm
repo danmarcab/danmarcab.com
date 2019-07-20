@@ -12,7 +12,7 @@ import Page.Home as Home
 import Page.NotFound as NotFound
 import Page.Post as Post
 import Page.QuadDivision as QuadDivision
-import Route exposing (Route)
+import Route
 import Style.Color as Color
 import Url exposing (Url)
 
@@ -36,7 +36,6 @@ type PageModel
 type Msg
     = NavigateTo Url
     | ClickedLink Browser.UrlRequest
-    | GoToRoute Route
     | MenuMsg Menu.Msg
     | HomeMsg Home.Msg
     | PostMsg Post.Msg
@@ -57,9 +56,6 @@ update msg model =
                     ( model
                     , Navigation.load url
                     )
-
-        ( GoToRoute route, _ ) ->
-            ( model, goToRoute model.navKey route )
 
         ( NavigateTo url, _ ) ->
             let
@@ -93,11 +89,6 @@ update msg model =
 
         ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
-
-
-goToRoute : Navigation.Key -> Route -> Cmd msg
-goToRoute navKey route =
-    Navigation.pushUrl navKey (Route.toUrlString route)
 
 
 view : Model -> Browser.Document Msg
@@ -206,15 +197,15 @@ init flags url navKey =
         ( menu, menuCmd ) =
             Menu.init
 
-        ( posts, errs ) =
+        ( posts, _ ) =
             case JD.decodeValue PostList.decoder flags.unparsedPosts of
                 Ok ( decodedPosts, [] ) ->
                     ( decodedPosts, "" )
 
-                Ok ( decodedPosts, someErrors ) ->
+                Ok ( decodedPosts, _ ) ->
                     ( decodedPosts, "" )
 
-                Err someErrors ->
+                Err _ ->
                     ( PostList.empty, "" )
     in
     ( { navKey = navKey

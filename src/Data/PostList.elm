@@ -36,12 +36,12 @@ get id (PostList postList) =
 map : (Post -> a) -> PostList -> List a
 map mapper (PostList postList) =
     AssocList.toList postList
-        |> List.map (\( id, post ) -> mapper post)
+        |> List.map (\( _, post ) -> mapper post)
 
 
 filter : (Post -> Bool) -> PostList -> PostList
 filter f (PostList postList) =
-    AssocList.filter (\id post -> f post) postList
+    AssocList.filter (\_ post -> f post) postList
         |> PostList
 
 
@@ -77,6 +77,6 @@ sort : PostList -> PostList
 sort (PostList postList) =
     postList
         |> AssocList.toList
-        |> List.sortBy (\( id, post ) -> Time.posixToMillis post.publishedDate)
+        |> List.sortBy (\( _, post ) -> Time.posixToMillis post.publishedDate)
         |> AssocList.fromList
         |> PostList

@@ -1,7 +1,6 @@
 module Page.NotFound exposing (view)
 
 import Element exposing (Element)
-import Element.Background as Background
 import Element.Font as Font
 import Layout.Page
 import Style.Color as Color

@@ -15,10 +15,6 @@ import Style.Color as Color
 import Time
 
 
-type alias Date =
-    ( Int, Int, Int )
-
-
 type alias Post =
     { id : String
     , title : String
@@ -28,10 +24,6 @@ type alias Post =
     , tags : List Tag
     , content : Color.Scheme -> Element Never
     }
-
-
-type Content
-    = Text String
 
 
 type alias Tag =
@@ -96,16 +88,19 @@ document id =
         }
 
 
+type alias Metadata =
+    { title : String
+    , abstract : String
+    , publishedDate : Time.Posix
+    , published : Bool
+    , tags : List String
+    }
+
+
+metadata : Mark.Block Metadata
 metadata =
     Mark.record "Post"
-        (\title abstract publishedDate published tags ->
-            { title = title
-            , abstract = abstract
-            , publishedDate = publishedDate
-            , published = published
-            , tags = tags
-            }
-        )
+        Metadata
         |> Mark.field "title" Mark.string
         |> Mark.field "abstract" Mark.string
         |> Mark.field "publishedDate" date
@@ -121,19 +116,17 @@ date =
             str
                 |> Iso8601.toTime
                 |> Result.mapError
-                    (\_ -> illformatedDateMessage)
+                    (\_ ->
+                        { title = "Bad Date"
+                        , message =
+                            [ "I was trying to parse a date, but this format looks off.\n\n"
+                            , "Dates should be in ISO 8601 format:\n\n"
+                            , "YYYY-MM-DDTHH:mm:ss.SSSZ"
+                            ]
+                        }
+                    )
         )
         Mark.string
-
-
-illformatedDateMessage =
-    { title = "Bad Date"
-    , message =
-        [ "I was trying to parse a date, but this format looks off.\n\n"
-        , "Dates should be in ISO 8601 format:\n\n"
-        , "YYYY-MM-DDTHH:mm:ss.SSSZ"
-        ]
-    }
 
 
 text : Mark.Block (List (Color.Scheme -> Element msg))
@@ -161,7 +154,7 @@ text =
 
 
 viewText : Mark.Styles -> String -> Color.Scheme -> Element msg
-viewText styles string colorScheme =
+viewText styles string _ =
     let
         attrs =
             [ ( styles.bold, Font.bold ), ( styles.italic, Font.italic ), ( styles.strike, Font.strike ) ]
@@ -179,7 +172,7 @@ viewText styles string colorScheme =
 header : Mark.Block (Color.Scheme -> Element msg)
 header =
     Mark.block "Header"
-        (\headerText colorScheme ->
+        (\headerText _ ->
             Element.paragraph
                 [ Font.size 24
                 , Element.spacing 12
@@ -215,7 +208,7 @@ code =
 image : Mark.Block (Color.Scheme -> Element msg)
 image =
     Mark.record "Image"
-        (\src description colorScheme ->
+        (\src description _ ->
             Element.column
                 [ Element.width Element.fill
                 , Element.spacing 10

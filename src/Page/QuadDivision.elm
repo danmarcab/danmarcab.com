@@ -151,8 +151,7 @@ settingsView model =
     <|
         Element.column [ Element.spacing 20, Element.width Element.fill ] <|
             [ Element.el [ Font.size 26 ] <| Element.text "Settings"
-            , -- TODO           Element.text "Step type (one | all)",
-              Input.slider sliderStyle
+            , Input.slider sliderStyle
                 { onChange = UpdateEveryChanged
                 , label =
                     Input.labelAbove []
@@ -216,6 +215,7 @@ internalSettingsView internalModel =
             []
 
 
+sliderStyle : List (Element.Attribute msg)
 sliderStyle =
     [ Border.width 1
     , Border.color (Element.rgba255 255 255 255 0.5)
@@ -223,6 +223,7 @@ sliderStyle =
     ]
 
 
+buttonStyle : List (Element.Attribute msg)
 buttonStyle =
     [ Border.width 1
     , Border.color (Element.rgba255 255 255 255 0.5)
@@ -249,7 +250,7 @@ subscriptions fullModel =
     in
     Sub.batch
         [ internalSubs
-        , Browser.Events.onResize (\w h -> Resized)
+        , Browser.Events.onResize (\_ _ -> Resized)
         ]
 
 

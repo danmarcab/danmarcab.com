@@ -13,7 +13,7 @@ module Art.QuadDivision exposing
     , view
     )
 
-import Array exposing (Array)
+import Array
 import Art.QuadDivision.Quad as Quad exposing (Quad)
 import Browser.Dom exposing (Viewport)
 import Random
