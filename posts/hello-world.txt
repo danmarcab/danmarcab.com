@@ -1,5 +1,8 @@
 |> Post
     title = Hello World!
+    abstract = This is my first post, in it I explain what the website is about and discuss what I am going to be writing about.
+    published = True
+    tags = Blog
 
 Hi there! It's me, Daniel, a London based software engineer, and for the nth time I am trying
 to start writing about things that interest me.

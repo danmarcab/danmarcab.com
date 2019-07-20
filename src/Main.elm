@@ -220,7 +220,12 @@ init flags url navKey =
     ( { navKey = navKey
       , menu = menu
       , page = page
-      , posts = posts
+      , posts =
+            if flags.showUnpublished then
+                posts
+
+            else
+                PostList.filter .published posts
       , colorScheme = Color.Light
       }
     , Cmd.batch

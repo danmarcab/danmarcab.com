@@ -2,6 +2,7 @@ module Data.PostList exposing
     ( PostList
     , decoder
     , empty
+    , filter
     , get
     , map
     )
@@ -35,6 +36,12 @@ map : (Post -> a) -> PostList -> List a
 map mapper (PostList postList) =
     AssocList.toList postList
         |> List.map (\( id, post ) -> mapper post)
+
+
+filter : (Post -> Bool) -> PostList -> PostList
+filter f (PostList postList) =
+    AssocList.filter (\id post -> f post) postList
+        |> PostList
 
 
 fromPostList : List Post -> ( PostList, List Error )

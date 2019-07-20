@@ -1,10 +1,8 @@
 module Data.Post exposing
     ( Post
-    , Status(..)
     , Tag
     , dateSorter
     , fromFileAndMarkup
-    , isPublished
     )
 
 import Element exposing (Element)
@@ -24,8 +22,8 @@ type alias Post =
     { id : String
     , title : String
     , abstract : String
-    , created : Date
-    , status : Status
+    , publishedDate : Date
+    , published : Bool
     , tags : List Tag
     , content : Color.Scheme -> Element Never
     }
@@ -33,11 +31,6 @@ type alias Post =
 
 type Content
     = Text String
-
-
-type Status
-    = Draft
-    | Published Date
 
 
 type alias Tag =
@@ -63,10 +56,10 @@ document id =
         (\meta contentBlocks ->
             { id = id
             , title = meta.title
-            , abstract = "This is dummy text to check how the abstract looks. This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks.This is dummy text to check how abstract looks."
-            , created = ( 2019, 3, 9 )
-            , status = Published ( 2019, 3, 9 )
-            , tags = [ "Elm", "Rust" ]
+            , abstract = meta.abstract
+            , publishedDate = ( 2019, 3, 9 )
+            , published = meta.published
+            , tags = meta.tags
             , content =
                 \colorScheme ->
                     Element.textColumn
@@ -104,11 +97,17 @@ document id =
 
 metadata =
     Mark.record "Post"
-        (\title ->
+        (\title abstract published tags ->
             { title = title
+            , abstract = abstract
+            , published = published
+            , tags = tags
             }
         )
         |> Mark.field "title" Mark.string
+        |> Mark.field "abstract" Mark.string
+        |> Mark.field "published" Mark.bool
+        |> Mark.field "tags" (Mark.map (String.split ", ") Mark.string)
         |> Mark.toBlock
 
 
@@ -209,32 +208,6 @@ image =
         |> Mark.toBlock
 
 
-isPublished : Post -> Bool
-isPublished post =
-    case post.status of
-        Draft ->
-            False
-
-        Published _ ->
-            True
-
-
 dateSorter : Post -> Post -> Order
 dateSorter post1 post2 =
-    case ( post1.status, post2.status ) of
-        ( Published published1, Published published2 ) ->
-            case compare published1 published2 of
-                EQ ->
-                    compare post1.created post2.created
-
-                other ->
-                    other
-
-        ( Published published1, Draft ) ->
-            compare published1 post2.created
-
-        ( Draft, Published published2 ) ->
-            compare post1.created published2
-
-        ( Draft, Draft ) ->
-            compare post1.created post2.created
+    compare post1.publishedDate post2.publishedDate

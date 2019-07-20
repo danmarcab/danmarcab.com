@@ -1,19 +1,13 @@
 module Page.Home exposing (Model, Msg, init, subscriptions, update, view)
 
-import Art.QuadDivision as QuadDivision
-import Browser.Dom exposing (Viewport)
 import Data.Post as Post exposing (Post)
 import Data.PostList as PostList exposing (PostList)
 import Element exposing (Element)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Html.Attributes
 import Layout.Page
-import Random
 import Route exposing (Route)
 import Style.Color as Color
-import Task
 
 
 type alias Model =
@@ -99,7 +93,8 @@ experimentsView { colorScheme } =
 header : { colorScheme : Color.Scheme } -> String -> Element msg
 header { colorScheme } text =
     Element.el
-        [ Border.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
+        [ Border.widthEach { top = 0, bottom = 2, left = 0, right = 0 }
+        , Border.color (Color.contentBorder colorScheme)
         , Element.width Element.fill
         , Element.paddingXY 0 5
         ]
@@ -131,15 +126,21 @@ postPreview { colorScheme } post =
                 , Element.width Element.fill
                 , Font.color (Color.secondaryText colorScheme)
                 ]
-                [ case post.status of
-                    Post.Draft ->
-                        Element.text "Draft"
+                [ let
+                    ( y, m, d ) =
+                        post.publishedDate
 
-                    Post.Published ( y, m, d ) ->
-                        Element.text <|
+                    startText =
+                        if post.published then
                             "Published on "
-                                ++ String.join "/"
-                                    [ String.fromInt d, String.fromInt m, String.fromInt y ]
+
+                        else
+                            "DRAFT!! To be published on "
+                  in
+                  Element.text <|
+                    startText
+                        ++ String.join "/"
+                            [ String.fromInt d, String.fromInt m, String.fromInt y ]
                 , Element.row [ Element.spacing 5 ]
                     (List.map
                         (\tag ->
@@ -150,6 +151,7 @@ postPreview { colorScheme } post =
                                 Element.text tag
                         )
                         post.tags
+                        |> List.intersperse (Element.text "|")
                     )
                 ]
             ]
