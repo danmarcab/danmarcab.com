@@ -6,8 +6,6 @@ module Style.Color exposing
     , primary
     , secondaryText
     , text
-    , titleBackground
-    , titleFont
     , white
     )
 
@@ -42,26 +40,6 @@ background scheme =
 
         Light ->
             Element.rgb255 215 234 235
-
-
-titleBackground : Scheme -> Color
-titleBackground scheme =
-    case scheme of
-        Dark ->
-            Element.rgb 0.3 0.3 0.3
-
-        Light ->
-            Element.rgb 0.7 0.7 0.7
-
-
-titleFont : Scheme -> Color
-titleFont scheme =
-    case scheme of
-        Dark ->
-            Element.rgb 0.9 0.9 0.9
-
-        Light ->
-            Element.rgb 0.1 0.1 0.1
 
 
 contentBorder : Scheme -> Color
