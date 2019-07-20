@@ -77,15 +77,22 @@ update msg model =
         ( HomeMsg _, _ ) ->
             ( model, Cmd.none )
 
+        ( PostMsg subMsg, Post pageModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Post.update subMsg pageModel
+            in
+            ( { model | page = Post newModel }, Cmd.map PostMsg cmd )
+
+        ( PostMsg _, _ ) ->
+            ( model, Cmd.none )
+
         ( QuadDivisionMsg subMsg, QuadDivision subModel ) ->
             let
                 ( newModel, cmd ) =
                     QuadDivision.update subMsg subModel
             in
             ( { model | page = QuadDivision newModel }, Cmd.map QuadDivisionMsg cmd )
-
-        ( PostMsg _, _ ) ->
-            ( model, Cmd.none )
 
         ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
