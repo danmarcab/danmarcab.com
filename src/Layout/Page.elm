@@ -14,7 +14,7 @@ view config { pageTitle, contentView } =
         [ Element.width (Element.px 1000)
         , Element.centerX
         , Border.shadow
-            { blur = 5
+            { blur = toFloat config.spacing.tiny
             , color = config.colors.tertiaryText
             , offset = ( 0, 0 )
             , size = 0
@@ -34,11 +34,16 @@ menuView config pageTitle =
     Element.row
         [ Element.alignTop
         , Element.alignLeft
-        , Element.paddingXY 20 10
+        , Element.paddingXY config.spacing.medium config.spacing.small
         , Background.color config.colors.headerBackground
         , Font.color config.colors.headerText
-        , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 0, bottomRight = 10 }
-        , Element.spacing 20
+        , Border.roundEach
+            { topLeft = 0
+            , topRight = 0
+            , bottomLeft = 0
+            , bottomRight = config.spacing.small
+            }
+        , Element.spacing config.spacing.medium
         , Font.size 25
         , Font.bold
         ]
@@ -67,16 +72,27 @@ footerView config =
     Element.row
         [ Element.alignBottom
         , Element.alignRight
-        , Element.paddingXY 20 10
+        , Element.paddingXY config.spacing.medium config.spacing.small
         , Background.color config.colors.headerBackground
         , Font.color config.colors.headerText
-        , Border.roundEach { topLeft = 10, topRight = 0, bottomLeft = 0, bottomRight = 0 }
-        , Element.spacing 20
+        , Border.roundEach
+            { topLeft = config.spacing.small
+            , topRight = 0
+            , bottomLeft = 0
+            , bottomRight = 0
+            }
+        , Element.spacing config.spacing.medium
         , Font.size 18
         ]
         [ Element.text "© 2019 - present Daniel Marin Cabillas"
-        , Element.link [] { url = "http://github.com/danmarcab", label = icon FeatherIcons.github }
-        , Element.link [] { url = "http://twitter.com/danmarcab", label = icon FeatherIcons.twitter }
+        , Element.link []
+            { url = "http://github.com/danmarcab"
+            , label = icon FeatherIcons.github
+            }
+        , Element.link []
+            { url = "http://twitter.com/danmarcab"
+            , label = icon FeatherIcons.twitter
+            }
         ]
 
 

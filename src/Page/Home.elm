@@ -47,16 +47,15 @@ contentView config posts _ =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
-        , Element.paddingXY 40 20
-        , Border.roundEach { topLeft = 10, topRight = 10, bottomLeft = 10, bottomRight = 10 }
-        , Element.spacing 20
+        , Element.paddingXY config.spacing.large config.spacing.medium
+        , Element.spacing config.spacing.medium
         ]
         [ Element.paragraph [ Font.size 20 ]
             [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
             ]
         , Element.row
             [ Element.width Element.fill
-            , Element.spacing 40
+            , Element.spacing config.spacing.large
             ]
             [ postsView config posts
             , experimentsView config
@@ -67,12 +66,12 @@ contentView config posts _ =
 postsView : Config -> PostList -> Element msg
 postsView config posts =
     Element.column
-        [ Element.spacing 20
+        [ Element.spacing config.spacing.medium
         , Element.alignTop
         , Element.width (Element.fillPortion 2)
         ]
         [ header config "Posts"
-        , Element.column [ Element.spacing 30 ] <|
+        , Element.column [ Element.spacing config.spacing.large ] <|
             PostList.map (postPreview config) posts
         ]
 
@@ -80,7 +79,7 @@ postsView config posts =
 experimentsView : Config -> Element msg
 experimentsView config =
     Element.column
-        [ Element.spacing 20
+        [ Element.spacing config.spacing.medium
         , Element.alignTop
         , Element.width (Element.fillPortion 1)
         ]
@@ -95,7 +94,7 @@ header config text =
         [ Border.widthEach { top = 0, bottom = 2, left = 0, right = 0 }
         , Border.color config.colors.tertiaryText
         , Element.width Element.fill
-        , Element.paddingXY 0 5
+        , Element.paddingXY 0 config.spacing.tiny
         ]
     <|
         Element.paragraph
@@ -108,11 +107,11 @@ header config text =
 postPreview : Config -> Post -> Element msg
 postPreview config post =
     Element.column
-        [ Element.spacing 10
+        [ Element.spacing config.spacing.small
         , Element.width Element.fill
         ]
         [ Element.column
-            [ Element.spacing 5
+            [ Element.spacing config.spacing.tiny
             , Element.width Element.fill
             ]
             [ Element.link []
@@ -120,7 +119,7 @@ postPreview config post =
                 , label = postHeader config post.title
                 }
             , Element.row
-                [ Element.spacing 20
+                [ Element.spacing config.spacing.medium
                 , Font.size 16
                 , Element.width Element.fill
                 , Font.color config.colors.secondaryText
@@ -178,7 +177,7 @@ postPreview config post =
                             , monthToString <| Time.toMonth Time.utc post.publishedDate
                             , String.fromInt <| Time.toYear Time.utc post.publishedDate
                             ]
-                , Element.row [ Element.spacing 5 ]
+                , Element.row [ Element.spacing config.spacing.tiny ]
                     (List.map
                         (\tag ->
                             Element.el
@@ -192,7 +191,7 @@ postPreview config post =
                     )
                 ]
             ]
-        , Element.column [ Element.spacing 10 ]
+        , Element.column [ Element.spacing config.spacing.small ]
             [ Element.paragraph [ Font.size 20 ] [ Element.text post.abstract ]
             , Element.link []
                 { url = Route.toUrlString (Route.Post post.id)

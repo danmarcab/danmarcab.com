@@ -75,13 +75,18 @@ document id =
                 , image
                 , code
                 , Mark.map
-                    (\ts cs ->
+                    (\ts config ->
                         Element.paragraph
-                            [ Font.size 20
-                            , Element.spacing 12
-                            , Element.paddingEach { top = 0, bottom = 40, right = 0, left = 0 }
+                            [ Font.size config.spacing.medium
+                            , Element.spacing config.spacing.small
+                            , Element.paddingEach
+                                { top = 0
+                                , bottom = config.spacing.large
+                                , right = 0
+                                , left = 0
+                                }
                             ]
-                            (List.map (\t -> t cs) ts)
+                            (List.map (\t -> t config) ts)
                     )
                     text
                 ]
@@ -172,12 +177,16 @@ viewText styles string _ =
 header : Mark.Block (Config -> Element msg)
 header =
     Mark.block "Header"
-        (\headerText _ ->
+        (\headerText config ->
             Element.paragraph
                 [ Font.size 24
-                , Element.spacing 12
                 , Font.bold
-                , Element.paddingEach { top = 0, bottom = 20, right = 0, left = 0 }
+                , Element.paddingEach
+                    { top = 0
+                    , bottom = config.spacing.medium
+                    , right = 0
+                    , left = 0
+                    }
                 ]
                 [ Element.text headerText ]
         )
@@ -189,13 +198,18 @@ code =
     Mark.block "Code"
         (\codeText config ->
             Element.el
-                [ Element.paddingEach { top = 0, bottom = 20, right = 0, left = 0 }
+                [ Element.paddingEach
+                    { top = 0
+                    , bottom = config.spacing.medium
+                    , right = 0
+                    , left = 0
+                    }
                 , Element.width Element.fill
                 ]
             <|
                 Element.el
                     [ Background.color config.colors.mainBackground
-                    , Element.paddingXY 20 0
+                    , Element.paddingXY config.spacing.medium 0
                     , Element.width Element.fill
                     ]
                 <|
@@ -208,17 +222,27 @@ code =
 image : Mark.Block (Config -> Element msg)
 image =
     Mark.record "Image"
-        (\src description _ ->
+        (\src description config ->
             Element.column
                 [ Element.width Element.fill
-                , Element.spacing 10
-                , Element.paddingEach { top = 0, bottom = 30, right = 0, left = 0 }
+                , Element.spacing config.spacing.small
+                , Element.paddingEach
+                    { top = 0
+                    , bottom = config.spacing.large
+                    , right = 0
+                    , left = 0
+                    }
                 ]
                 [ Element.image
                     [ Element.centerX
                     ]
                     { src = src, description = description }
-                , Element.el [ Element.centerX ] <| Element.text description
+                , Element.el
+                    [ Element.centerX
+                    , Font.color config.colors.secondaryText
+                    ]
+                  <|
+                    Element.text description
                 ]
         )
         |> Mark.field "src" Mark.string

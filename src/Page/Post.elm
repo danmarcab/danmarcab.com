@@ -44,7 +44,7 @@ view config model =
 contentView : Config -> Model -> Element Msg
 contentView config model =
     Element.el
-        [ Element.paddingXY 40 20
+        [ Element.paddingXY config.spacing.large config.spacing.medium
         , Element.alignTop
         , Element.height Element.fill
         ]

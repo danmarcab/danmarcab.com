@@ -23,9 +23,10 @@ contentView config =
         [ Element.centerX
         , Element.centerY
         , Font.size 24
-        , Element.spacing 20
+        , Element.spacing config.spacing.medium
         ]
-        [ Element.paragraph [ Element.centerX ] [ Element.text "We couldn't find the URL you entered. Please go back to the homepage" ]
+        [ Element.paragraph [ Element.centerX ]
+            [ Element.text "We couldn't find the URL you entered. Please go back to the homepage" ]
         , Element.link
             [ Font.color config.colors.primary
             , Element.centerX
