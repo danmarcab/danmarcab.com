@@ -1,42 +1,42 @@
 module Layout.Page exposing (view)
 
+import Config exposing (Config)
 import Element exposing (Element)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import FeatherIcons
-import Style.Color as Color
 
 
-view : { colorScheme : Color.Scheme } -> { pageTitle : String, contentView : Element msg } -> Element msg
-view { colorScheme } { pageTitle, contentView } =
+view : Config -> { pageTitle : String, contentView : Element msg } -> Element msg
+view config { pageTitle, contentView } =
     Element.column
         [ Element.width (Element.px 1000)
         , Element.centerX
         , Border.shadow
             { blur = 5
-            , color = Color.contentBorder colorScheme
+            , color = config.colors.tertiaryText
             , offset = ( 0, 0 )
             , size = 0
             }
         , Element.height Element.fill
-        , Background.color (Color.contentBackground colorScheme)
-        , Font.color (Color.text colorScheme)
+        , Background.color config.colors.contentBackground
+        , Font.color config.colors.text
         ]
-        [ menuView { colorScheme = colorScheme } pageTitle
+        [ menuView config pageTitle
         , contentView
-        , footerView { colorScheme = colorScheme }
+        , footerView config
         ]
 
 
-menuView : { colorScheme : Color.Scheme } -> String -> Element msg
-menuView { colorScheme } pageTitle =
+menuView : Config -> String -> Element msg
+menuView config pageTitle =
     Element.row
         [ Element.alignTop
         , Element.alignLeft
         , Element.paddingXY 20 10
-        , Background.color (Color.primary colorScheme)
-        , Font.color Color.white
+        , Background.color config.colors.headerBackground
+        , Font.color config.colors.headerText
         , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 0, bottomRight = 10 }
         , Element.spacing 20
         , Font.size 25
@@ -47,29 +47,29 @@ menuView { colorScheme } pageTitle =
             , label =
                 Element.el [] <| Element.text "danmarcab.com"
             }
-        , divider
+        , divider config
         , Element.el [] <| Element.text pageTitle
         ]
 
 
-divider : Element msg
-divider =
+divider : Config -> Element msg
+divider config =
     Element.el
-        [ Border.color Color.white
+        [ Border.color config.colors.headerText
         , Border.width 1
         , Element.height Element.fill
         ]
         Element.none
 
 
-footerView : { colorScheme : Color.Scheme } -> Element msg
-footerView { colorScheme } =
+footerView : Config -> Element msg
+footerView config =
     Element.row
         [ Element.alignBottom
         , Element.alignRight
         , Element.paddingXY 20 10
-        , Background.color (Color.primary colorScheme)
-        , Font.color Color.white
+        , Background.color config.colors.headerBackground
+        , Font.color config.colors.headerText
         , Border.roundEach { topLeft = 10, topRight = 0, bottomLeft = 0, bottomRight = 0 }
         , Element.spacing 20
         , Font.size 18

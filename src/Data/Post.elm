@@ -4,6 +4,7 @@ module Data.Post exposing
     , fromFileAndMarkup
     )
 
+import Config exposing (Config)
 import Element exposing (Element)
 import Element.Background as Background
 import Element.Font as Font
@@ -11,7 +12,6 @@ import Html
 import Iso8601
 import Mark
 import Mark.Error
-import Style.Color as Color
 import Time
 
 
@@ -22,7 +22,7 @@ type alias Post =
     , publishedDate : Time.Posix
     , published : Bool
     , tags : List Tag
-    , content : Color.Scheme -> Element Never
+    , content : Config -> Element Never
     }
 
 
@@ -54,7 +54,7 @@ document id =
             , published = meta.published
             , tags = meta.tags
             , content =
-                \colorScheme ->
+                \config ->
                     Element.textColumn
                         [ Font.family
                             [ Font.typeface "Verdana"
@@ -63,7 +63,7 @@ document id =
                             ]
                         , Element.width Element.fill
                         ]
-                        (List.map (\b -> b colorScheme)
+                        (List.map (\b -> b config)
                             contentBlocks
                         )
             }
@@ -129,23 +129,23 @@ date =
         Mark.string
 
 
-text : Mark.Block (List (Color.Scheme -> Element msg))
+text : Mark.Block (List (Config -> Element msg))
 text =
     Mark.textWith
         { view = viewText
         , replacements = Mark.commonReplacements
         , inlines =
             [ Mark.annotation "link"
-                (\texts url colorScheme ->
+                (\texts url config ->
                     let
                         linkText =
                             texts
                                 |> List.map Tuple.second
                                 |> String.join " "
                     in
-                    Element.link [ Font.color (Color.primary colorScheme) ]
+                    Element.link [ Font.color config.colors.primary ]
                         { url = url
-                        , label = viewText { bold = False, strike = False, italic = False } linkText colorScheme
+                        , label = viewText { bold = False, strike = False, italic = False } linkText config
                         }
                 )
                 |> Mark.field "url" Mark.string
@@ -153,7 +153,7 @@ text =
         }
 
 
-viewText : Mark.Styles -> String -> Color.Scheme -> Element msg
+viewText : Mark.Styles -> String -> Config -> Element msg
 viewText styles string _ =
     let
         attrs =
@@ -169,7 +169,7 @@ viewText styles string _ =
             Element.el attrs (Element.text string)
 
 
-header : Mark.Block (Color.Scheme -> Element msg)
+header : Mark.Block (Config -> Element msg)
 header =
     Mark.block "Header"
         (\headerText _ ->
@@ -184,17 +184,17 @@ header =
         Mark.string
 
 
-code : Mark.Block (Color.Scheme -> Element msg)
+code : Mark.Block (Config -> Element msg)
 code =
     Mark.block "Code"
-        (\codeText colorScheme ->
+        (\codeText config ->
             Element.el
                 [ Element.paddingEach { top = 0, bottom = 20, right = 0, left = 0 }
                 , Element.width Element.fill
                 ]
             <|
                 Element.el
-                    [ Background.color (Color.background colorScheme)
+                    [ Background.color config.colors.mainBackground
                     , Element.paddingXY 20 0
                     , Element.width Element.fill
                     ]
@@ -205,7 +205,7 @@ code =
         Mark.string
 
 
-image : Mark.Block (Color.Scheme -> Element msg)
+image : Mark.Block (Config -> Element msg)
 image =
     Mark.record "Image"
         (\src description _ ->

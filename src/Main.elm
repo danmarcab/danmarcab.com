@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Navigation
+import Config exposing (Config)
 import Data.PostList as PostList exposing (PostList)
 import Element
 import Element.Background as Background
@@ -13,7 +14,6 @@ import Page.NotFound as NotFound
 import Page.Post as Post
 import Page.QuadDivision as QuadDivision
 import Route
-import Style.Color as Color
 import Url exposing (Url)
 
 
@@ -22,7 +22,7 @@ type alias Model =
     , menu : Menu.Model
     , page : PageModel
     , posts : PostList
-    , colorScheme : Color.Scheme
+    , config : Config
     }
 
 
@@ -106,7 +106,7 @@ view model =
                 Home pageModel ->
                     let
                         { title, body } =
-                            Home.view { colorScheme = model.colorScheme } model.posts pageModel
+                            Home.view model.config model.posts pageModel
                     in
                     ( False
                     , { title = title
@@ -117,7 +117,7 @@ view model =
                 Post pageModel ->
                     let
                         { title, body } =
-                            Post.view { colorScheme = model.colorScheme } pageModel
+                            Post.view model.config pageModel
                     in
                     ( False
                     , { title = title
@@ -137,7 +137,7 @@ view model =
                     )
 
                 NotFound ->
-                    ( False, NotFound.view { colorScheme = model.colorScheme } )
+                    ( False, NotFound.view model.config )
 
         attrs =
             if showFloatingMenu then
@@ -156,7 +156,7 @@ view model =
             ([ Font.family
                 [ Font.typeface "Arial"
                 ]
-             , Background.color (Color.background model.colorScheme)
+             , Background.color model.config.colors.mainBackground
              ]
                 ++ attrs
             )
@@ -224,7 +224,10 @@ init flags url navKey =
 
             else
                 PostList.filter .published posts
-      , colorScheme = Color.Light
+      , config =
+            { colors = Config.lightModeColors
+            , spacing = Config.desktopSpacing
+            }
       }
     , Cmd.batch
         [ cmd

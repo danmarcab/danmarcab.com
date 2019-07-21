@@ -1,24 +1,24 @@
 module Page.NotFound exposing (view)
 
+import Config exposing (Config)
 import Element exposing (Element)
 import Element.Font as Font
 import Layout.Page
-import Style.Color as Color
 
 
-view : { colorScheme : Color.Scheme } -> { title : String, body : Element msg }
-view { colorScheme } =
+view : Config -> { title : String, body : Element msg }
+view config =
     { title = "Not Found"
     , body =
-        Layout.Page.view { colorScheme = colorScheme }
+        Layout.Page.view config
             { pageTitle = "Not Found"
-            , contentView = contentView { colorScheme = colorScheme }
+            , contentView = contentView config
             }
     }
 
 
-contentView : { colorScheme : Color.Scheme } -> Element msg
-contentView { colorScheme } =
+contentView : Config -> Element msg
+contentView config =
     Element.column
         [ Element.centerX
         , Element.centerY
@@ -27,7 +27,7 @@ contentView { colorScheme } =
         ]
         [ Element.paragraph [ Element.centerX ] [ Element.text "We couldn't find the URL you entered. Please go back to the homepage" ]
         , Element.link
-            [ Font.color (Color.primary colorScheme)
+            [ Font.color config.colors.primary
             , Element.centerX
             ]
             { url = "/", label = Element.text "Click to go back to the Homepage" }
