@@ -1,5 +1,6 @@
 module Page.Home exposing (Model, Msg, init, subscriptions, update, view)
 
+import Config exposing (Config)
 import Data.Post exposing (Post)
 import Data.PostList as PostList exposing (PostList)
 import Element exposing (Element)
@@ -7,7 +8,6 @@ import Element.Border as Border
 import Element.Font as Font
 import Layout.Page
 import Route
-import Style.Color as Color
 import Time exposing (Month(..))
 
 
@@ -31,99 +31,98 @@ update () model =
     ( model, Cmd.none )
 
 
-view : { colorScheme : Color.Scheme } -> PostList -> Model -> { title : String, body : Element Msg }
-view { colorScheme } posts model =
+view : Config -> PostList -> Model -> { title : String, body : Element Msg }
+view config posts model =
     { title = "Home"
     , body =
-        Layout.Page.view { colorScheme = colorScheme }
+        Layout.Page.view config
             { pageTitle = "Home"
-            , contentView = contentView { colorScheme = colorScheme } posts model
+            , contentView = contentView config posts model
             }
     }
 
 
-contentView : { colorScheme : Color.Scheme } -> PostList -> Model -> Element Msg
-contentView { colorScheme } posts _ =
+contentView : Config -> PostList -> Model -> Element Msg
+contentView config posts _ =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
-        , Element.paddingXY 40 20
-        , Border.roundEach { topLeft = 10, topRight = 10, bottomLeft = 10, bottomRight = 10 }
-        , Element.spacing 20
+        , Element.paddingXY config.spacing.large config.spacing.medium
+        , Element.spacing config.spacing.medium
         ]
-        [ Element.paragraph [ Font.size 20 ]
+        [ Element.paragraph [ Font.size config.fontSize.medium ]
             [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
             ]
         , Element.row
             [ Element.width Element.fill
-            , Element.spacing 40
+            , Element.spacing config.spacing.large
             ]
-            [ postsView { colorScheme = colorScheme } posts
-            , experimentsView { colorScheme = colorScheme }
+            [ postsView config posts
+            , experimentsView config
             ]
         ]
 
 
-postsView : { colorScheme : Color.Scheme } -> PostList -> Element msg
-postsView { colorScheme } posts =
+postsView : Config -> PostList -> Element msg
+postsView config posts =
     Element.column
-        [ Element.spacing 20
+        [ Element.spacing config.spacing.medium
         , Element.alignTop
         , Element.width (Element.fillPortion 2)
         ]
-        [ header { colorScheme = colorScheme } "Posts"
-        , Element.column [ Element.spacing 30 ] <|
-            PostList.map (postPreview { colorScheme = colorScheme }) posts
+        [ header config "Posts"
+        , Element.column [ Element.spacing config.spacing.large ] <|
+            PostList.map (postPreview config) posts
         ]
 
 
-experimentsView : { colorScheme : Color.Scheme } -> Element msg
-experimentsView { colorScheme } =
+experimentsView : Config -> Element msg
+experimentsView config =
     Element.column
-        [ Element.spacing 20
+        [ Element.spacing config.spacing.medium
         , Element.alignTop
         , Element.width (Element.fillPortion 1)
         ]
-        [ header { colorScheme = colorScheme } "Experiments"
+        [ header config "Experiments"
         , Element.paragraph [] [ Element.text "Coming soon..." ]
         ]
 
 
-header : { colorScheme : Color.Scheme } -> String -> Element msg
-header { colorScheme } text =
+header : Config -> String -> Element msg
+header config text =
     Element.el
         [ Border.widthEach { top = 0, bottom = 2, left = 0, right = 0 }
-        , Border.color (Color.contentBorder colorScheme)
+        , Border.color config.colors.tertiaryText
         , Element.width Element.fill
-        , Element.paddingXY 0 5
+        , Element.paddingXY 0 config.spacing.tiny
         ]
     <|
         Element.paragraph
-            [ Font.size 30
+            [ Font.size config.fontSize.extraLarge
             , Font.bold
             ]
             [ Element.text text ]
 
 
-postPreview : { colorScheme : Color.Scheme } -> Post -> Element msg
-postPreview { colorScheme } post =
+postPreview : Config -> Post -> Element msg
+postPreview config post =
     Element.column
-        [ Element.spacing 10
+        [ Element.spacing config.spacing.small
         , Element.width Element.fill
         ]
         [ Element.column
-            [ Element.spacing 5
+            [ Element.spacing config.spacing.tiny
             , Element.width Element.fill
             ]
             [ Element.link []
                 { url = Route.toUrlString (Route.Post post.id)
-                , label = postHeader { colorScheme = colorScheme } post.title
+                , label = postHeader config post.title
                 }
             , Element.row
-                [ Element.spacing 20
-                , Font.size 16
+                [ Element.spacing config.spacing.medium
+                , Font.size config.fontSize.small
                 , Element.width Element.fill
-                , Font.color (Color.secondaryText colorScheme)
+                , Font.color config.colors.secondaryText
                 ]
                 [ let
                     monthToString month =
@@ -178,11 +177,11 @@ postPreview { colorScheme } post =
                             , monthToString <| Time.toMonth Time.utc post.publishedDate
                             , String.fromInt <| Time.toYear Time.utc post.publishedDate
                             ]
-                , Element.row [ Element.spacing 5 ]
+                , Element.row [ Element.spacing config.spacing.tiny ]
                     (List.map
                         (\tag ->
                             Element.el
-                                [ Font.color (Color.primary colorScheme)
+                                [ Font.color config.colors.primary
                                 ]
                             <|
                                 Element.text tag
@@ -192,13 +191,14 @@ postPreview { colorScheme } post =
                     )
                 ]
             ]
-        , Element.column [ Element.spacing 10 ]
-            [ Element.paragraph [ Font.size 20 ] [ Element.text post.abstract ]
+        , Element.column [ Element.spacing config.spacing.small ]
+            [ Element.paragraph [ Font.size config.fontSize.medium
+            ] [ Element.text post.abstract ]
             , Element.link []
                 { url = Route.toUrlString (Route.Post post.id)
                 , label =
                     Element.el
-                        [ Font.color (Color.primary colorScheme)
+                        [ Font.color config.colors.primary
                         ]
                     <|
                         Element.text "Read more >>"
@@ -207,12 +207,12 @@ postPreview { colorScheme } post =
         ]
 
 
-postHeader : { colorScheme : Color.Scheme } -> String -> Element msg
-postHeader { colorScheme } text =
+postHeader : Config -> String -> Element msg
+postHeader config text =
     Element.paragraph
-        [ Font.size 26
+        [ Font.size config.fontSize.large
         , Font.bold
-        , Font.color (Color.primary colorScheme)
+        , Font.color config.colors.primary
         ]
         [ Element.text text ]
 

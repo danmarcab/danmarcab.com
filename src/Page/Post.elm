@@ -1,9 +1,9 @@
 module Page.Post exposing (Model, Msg, init, subscriptions, update, view)
 
+import Config exposing (Config)
 import Data.Post exposing (Post)
 import Element exposing (Element)
 import Layout.Page
-import Style.Color as Color
 
 
 type alias Model =
@@ -30,26 +30,26 @@ update () model =
 -- VIEW
 
 
-view : { colorScheme : Color.Scheme } -> Model -> { title : String, body : Element Msg }
-view { colorScheme } model =
+view : Config -> Model -> { title : String, body : Element Msg }
+view config model =
     { title = model.post.title
     , body =
-        Layout.Page.view { colorScheme = colorScheme }
+        Layout.Page.view config
             { pageTitle = model.post.title
-            , contentView = contentView { colorScheme = colorScheme } model
+            , contentView = contentView config model
             }
     }
 
 
-contentView : { colorScheme : Color.Scheme } -> Model -> Element Msg
-contentView { colorScheme } model =
+contentView : Config -> Model -> Element Msg
+contentView config model =
     Element.el
-        [ Element.paddingXY 40 20
+        [ Element.paddingXY config.spacing.large config.spacing.medium
         , Element.alignTop
         , Element.height Element.fill
         ]
     <|
-        Element.map never (model.post.content colorScheme)
+        Element.map never (model.post.content config)
 
 
 subscriptions : Model -> Sub Msg
