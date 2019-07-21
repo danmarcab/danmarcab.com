@@ -22,7 +22,7 @@ contentView config =
     Element.column
         [ Element.centerX
         , Element.centerY
-        , Font.size 24
+        , Font.size config.fontSize.large
         , Element.spacing config.spacing.medium
         ]
         [ Element.paragraph [ Element.centerX ]

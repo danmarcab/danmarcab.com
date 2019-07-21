@@ -1,4 +1,9 @@
-module Config exposing (Config, desktopSpacing, lightModeColors)
+module Config exposing
+    ( Config
+    , desktopFontSize
+    , desktopSpacing
+    , lightModeColors
+    )
 
 import Element exposing (Color)
 
@@ -6,10 +11,20 @@ import Element exposing (Color)
 type alias Config =
     { colors : Colors
     , spacing : Spacing
+    , fontSize : FontSize
     }
 
 
 type alias Spacing =
+    { tiny : Int
+    , small : Int
+    , medium : Int
+    , large : Int
+    , extraLarge : Int
+    }
+
+
+type alias FontSize =
     { tiny : Int
     , small : Int
     , medium : Int
@@ -50,4 +65,14 @@ desktopSpacing =
     , medium = 20
     , large = 40
     , extraLarge = 80
+    }
+
+
+desktopFontSize : FontSize
+desktopFontSize =
+    { tiny = 12
+    , small = 16
+    , medium = 20
+    , large = 26
+    , extraLarge = 32
     }

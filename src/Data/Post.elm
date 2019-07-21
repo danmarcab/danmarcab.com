@@ -77,7 +77,7 @@ document id =
                 , Mark.map
                     (\ts config ->
                         Element.paragraph
-                            [ Font.size config.spacing.medium
+                            [ Font.size config.fontSize.medium
                             , Element.spacing config.spacing.small
                             , Element.paddingEach
                                 { top = 0
@@ -179,7 +179,7 @@ header =
     Mark.block "Header"
         (\headerText config ->
             Element.paragraph
-                [ Font.size 24
+                [ Font.size config.fontSize.large
                 , Font.bold
                 , Element.paddingEach
                     { top = 0

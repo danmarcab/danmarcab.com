@@ -44,7 +44,7 @@ menuView config pageTitle =
             , bottomRight = config.spacing.small
             }
         , Element.spacing config.spacing.medium
-        , Font.size 25
+        , Font.size config.fontSize.large
         , Font.bold
         ]
         [ Element.link []
@@ -82,7 +82,7 @@ footerView config =
             , bottomRight = 0
             }
         , Element.spacing config.spacing.medium
-        , Font.size 18
+        , Font.size config.fontSize.small
         ]
         [ Element.text "© 2019 - present Daniel Marin Cabillas"
         , Element.link []

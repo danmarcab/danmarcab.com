@@ -50,7 +50,7 @@ contentView config posts _ =
         , Element.paddingXY config.spacing.large config.spacing.medium
         , Element.spacing config.spacing.medium
         ]
-        [ Element.paragraph [ Font.size 20 ]
+        [ Element.paragraph [ Font.size config.fontSize.medium ]
             [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
             ]
         , Element.row
@@ -98,7 +98,7 @@ header config text =
         ]
     <|
         Element.paragraph
-            [ Font.size 30
+            [ Font.size config.fontSize.extraLarge
             , Font.bold
             ]
             [ Element.text text ]
@@ -120,7 +120,7 @@ postPreview config post =
                 }
             , Element.row
                 [ Element.spacing config.spacing.medium
-                , Font.size 16
+                , Font.size config.fontSize.small
                 , Element.width Element.fill
                 , Font.color config.colors.secondaryText
                 ]
@@ -192,7 +192,8 @@ postPreview config post =
                 ]
             ]
         , Element.column [ Element.spacing config.spacing.small ]
-            [ Element.paragraph [ Font.size 20 ] [ Element.text post.abstract ]
+            [ Element.paragraph [ Font.size config.fontSize.medium
+            ] [ Element.text post.abstract ]
             , Element.link []
                 { url = Route.toUrlString (Route.Post post.id)
                 , label =
@@ -209,7 +210,7 @@ postPreview config post =
 postHeader : Config -> String -> Element msg
 postHeader config text =
     Element.paragraph
-        [ Font.size 26
+        [ Font.size config.fontSize.large
         , Font.bold
         , Font.color config.colors.primary
         ]

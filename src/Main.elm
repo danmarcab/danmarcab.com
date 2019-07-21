@@ -227,6 +227,7 @@ init flags url navKey =
       , config =
             { colors = Config.lightModeColors
             , spacing = Config.desktopSpacing
+            , fontSize = Config.desktopFontSize
             }
       }
     , Cmd.batch
