@@ -8,7 +8,6 @@ import Element
 import Element.Background as Background
 import Element.Font as Font
 import Json.Decode as JD
-import Menu
 import Page.Home as Home
 import Page.NotFound as NotFound
 import Page.Post as Post
@@ -19,7 +18,6 @@ import Url exposing (Url)
 
 type alias Model =
     { navKey : Navigation.Key
-    , menu : Menu.Model
     , page : PageModel
     , posts : PostList
     , config : Config
@@ -36,7 +34,6 @@ type PageModel
 type Msg
     = NavigateTo Url
     | ClickedLink Browser.UrlRequest
-    | MenuMsg Menu.Msg
     | HomeMsg Home.Msg
     | PostMsg Post.Msg
     | QuadDivisionMsg QuadDivision.Msg
@@ -63,9 +60,6 @@ update msg model =
                     initPageFromUrl model.posts url
             in
             ( { model | page = page }, cmd )
-
-        ( MenuMsg menuMsg, _ ) ->
-            ( { model | menu = Menu.update menuMsg model.menu }, Cmd.none )
 
         ( HomeMsg subMsg, Home pageModel ) ->
             let
@@ -101,65 +95,46 @@ update msg model =
 view : Model -> Browser.Document Msg
 view model =
     let
-        ( showFloatingMenu, pageDocument ) =
+        pageDocument =
             case model.page of
                 Home pageModel ->
                     let
                         { title, body } =
                             Home.view model.config model.posts pageModel
                     in
-                    ( False
-                    , { title = title
-                      , body = Element.map HomeMsg body
-                      }
-                    )
+                    { title = title
+                    , body = Element.map HomeMsg body
+                    }
 
                 Post pageModel ->
                     let
                         { title, body } =
                             Post.view model.config pageModel
                     in
-                    ( False
-                    , { title = title
-                      , body = Element.map PostMsg body
-                      }
-                    )
+                    { title = title
+                    , body = Element.map PostMsg body
+                    }
 
                 QuadDivision pageModel ->
                     let
                         { title, body } =
                             QuadDivision.view pageModel
                     in
-                    ( True
-                    , { title = title
-                      , body = Element.map QuadDivisionMsg body
-                      }
-                    )
+                    { title = title
+                    , body = Element.map QuadDivisionMsg body
+                    }
 
                 NotFound ->
-                    ( False, NotFound.view model.config )
-
-        attrs =
-            if showFloatingMenu then
-                [ Element.inFront
-                    (Element.map MenuMsg <|
-                        Menu.view { pageTitle = pageDocument.title } model.menu
-                    )
-                ]
-
-            else
-                []
+                    NotFound.view model.config
     in
     { title = pageDocument.title ++ " - danmarcab.com"
     , body =
         [ Element.layout
-            ([ Font.family
+            [ Font.family
                 [ Font.typeface "Arial"
                 ]
-             , Background.color model.config.colors.mainBackground
-             ]
-                ++ attrs
-            )
+            , Background.color model.config.colors.mainBackground
+            ]
           <|
             Element.el
                 [ Element.centerX
@@ -201,9 +176,6 @@ init flags url navKey =
         ( page, cmd ) =
             initPageFromUrl posts url
 
-        ( menu, menuCmd ) =
-            Menu.init
-
         ( posts, _ ) =
             case JD.decodeValue PostList.decoder flags.unparsedPosts of
                 Ok ( decodedPosts, [] ) ->
@@ -216,7 +188,6 @@ init flags url navKey =
                     ( PostList.empty, "" )
     in
     ( { navKey = navKey
-      , menu = menu
       , page = page
       , posts =
             if flags.showUnpublished then
@@ -230,10 +201,7 @@ init flags url navKey =
             , fontSize = Config.desktopFontSize
             }
       }
-    , Cmd.batch
-        [ cmd
-        , Cmd.map MenuMsg menuCmd
-        ]
+    , cmd
     )
 
 
