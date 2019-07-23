@@ -76,6 +76,22 @@ postsView config posts =
         ]
 
 
+type alias Experiment =
+    { title : String
+    , abstract : String
+    , url : String
+    }
+
+
+experiments : List Experiment
+experiments =
+    [ { title = "Quad Division"
+      , abstract = "Create nice images by just randomly subdividing Quads."
+      , url = Route.toUrlString Route.QuadDivision
+      }
+    ]
+
+
 experimentsView : Config -> Element msg
 experimentsView config =
     Element.column
@@ -84,7 +100,39 @@ experimentsView config =
         , Element.width (Element.fillPortion 1)
         ]
         [ header config "Experiments"
-        , Element.paragraph [] [ Element.text "Coming soon..." ]
+        , Element.column [ Element.spacing config.spacing.large ] <|
+            List.map (experimentPreview config) experiments
+        ]
+
+
+experimentPreview : Config -> Experiment -> Element msg
+experimentPreview config experiment =
+    Element.column
+        [ Element.spacing config.spacing.small
+        , Element.width Element.fill
+        ]
+        [ Element.link []
+            { url = experiment.url
+            , label = postHeader config experiment.title
+            }
+        , Element.column [ Element.spacing config.spacing.small ]
+            [ Element.paragraph
+                [ Font.size config.fontSize.medium
+                ]
+                [ Element.text experiment.abstract ]
+            , Element.image
+                [ Element.width Element.fill, Element.centerX ]
+                { src = "/images/quad-division.svg", description = experiment.title }
+            , Element.link []
+                { url = experiment.url
+                , label =
+                    Element.el
+                        [ Font.color config.colors.primary
+                        ]
+                    <|
+                        Element.text "See more..."
+                }
+            ]
         ]
 
 
@@ -125,44 +173,6 @@ postPreview config post =
                 , Font.color config.colors.secondaryText
                 ]
                 [ let
-                    monthToString month =
-                        case month of
-                            Jan ->
-                                "Jan"
-
-                            Feb ->
-                                "Feb"
-
-                            Mar ->
-                                "Mar"
-
-                            Apr ->
-                                "Apr"
-
-                            May ->
-                                "May"
-
-                            Jun ->
-                                "Jun"
-
-                            Jul ->
-                                "Jul"
-
-                            Aug ->
-                                "Aug"
-
-                            Sep ->
-                                "Sep"
-
-                            Oct ->
-                                "Oct"
-
-                            Nov ->
-                                "Nov"
-
-                            Dec ->
-                                "Dec"
-
                     startText =
                         if post.published then
                             "Published on "
@@ -192,8 +202,10 @@ postPreview config post =
                 ]
             ]
         , Element.column [ Element.spacing config.spacing.small ]
-            [ Element.paragraph [ Font.size config.fontSize.medium
-            ] [ Element.text post.abstract ]
+            [ Element.paragraph
+                [ Font.size config.fontSize.medium
+                ]
+                [ Element.text post.abstract ]
             , Element.link []
                 { url = Route.toUrlString (Route.Post post.id)
                 , label =
@@ -201,10 +213,50 @@ postPreview config post =
                         [ Font.color config.colors.primary
                         ]
                     <|
-                        Element.text "Read more >>"
+                        Element.text "Read more..."
                 }
             ]
         ]
+
+
+monthToString : Month -> String
+monthToString month =
+    case month of
+        Jan ->
+            "Jan"
+
+        Feb ->
+            "Feb"
+
+        Mar ->
+            "Mar"
+
+        Apr ->
+            "Apr"
+
+        May ->
+            "May"
+
+        Jun ->
+            "Jun"
+
+        Jul ->
+            "Jul"
+
+        Aug ->
+            "Aug"
+
+        Sep ->
+            "Sep"
+
+        Oct ->
+            "Oct"
+
+        Nov ->
+            "Nov"
+
+        Dec ->
+            "Dec"
 
 
 postHeader : Config -> String -> Element msg
