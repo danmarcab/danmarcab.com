@@ -11,6 +11,10 @@ type alias Config =
     , spacing : Spacing
     , fontSize : FontSize
     , device : Element.Device
+    , viewport :
+        { width : Int
+        , height : Int
+        }
     }
 
 
@@ -66,6 +70,7 @@ fromViewport viewport =
             _ ->
                 desktopFontSize
     , device = device
+    , viewport = viewport
     }
 
 

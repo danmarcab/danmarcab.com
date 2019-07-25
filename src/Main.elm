@@ -59,7 +59,7 @@ update msg model =
         ( NavigateTo url, _ ) ->
             let
                 ( page, cmd ) =
-                    initPageFromUrl model.posts url
+                    initPageFromUrl model.config model.posts url
             in
             ( { model | page = page }, cmd )
 
@@ -123,7 +123,7 @@ view model =
                 QuadDivision pageModel ->
                     let
                         { title, body } =
-                            QuadDivision.view pageModel
+                            QuadDivision.view model.config pageModel
                     in
                     { title = title
                     , body = Element.map QuadDivisionMsg body
@@ -178,8 +178,11 @@ subscriptions model =
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
+        config =
+            Config.fromViewport flags.viewport
+
         ( page, cmd ) =
-            initPageFromUrl posts url
+            initPageFromUrl config posts url
 
         ( posts, _ ) =
             case JD.decodeValue PostList.decoder flags.unparsedPosts of
@@ -200,7 +203,7 @@ init flags url navKey =
 
             else
                 PostList.filter .published posts
-      , config = Config.fromViewport flags.viewport
+      , config = config
       }
     , cmd
     )
@@ -228,8 +231,8 @@ main =
         }
 
 
-initPageFromUrl : PostList -> Url -> ( PageModel, Cmd Msg )
-initPageFromUrl posts url =
+initPageFromUrl : Config -> PostList -> Url -> ( PageModel, Cmd Msg )
+initPageFromUrl config posts url =
     case Route.parseUrl url of
         Route.Home ->
             let
@@ -249,7 +252,7 @@ initPageFromUrl posts url =
         Route.QuadDivision ->
             let
                 ( model, cmd ) =
-                    QuadDivision.init
+                    QuadDivision.init config
             in
             ( QuadDivision model, Cmd.map QuadDivisionMsg cmd )
 
