@@ -15,7 +15,6 @@ module Art.QuadDivision exposing
 
 import Array
 import Art.QuadDivision.Quad as Quad exposing (Quad)
-import Browser.Dom exposing (Viewport)
 import Random
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -44,9 +43,11 @@ defaultSettings : Viewport -> Settings
 defaultSettings viewport =
     let
         separation =
-            min viewport.viewport.width viewport.viewport.height
+            min viewport.width viewport.height
+                |> toFloat
                 |> (\num -> num / 1000.0)
                 |> round
+                |> max 1
                 |> (\num -> num * 5)
                 |> toFloat
     in
@@ -96,6 +97,12 @@ type Model
         }
 
 
+type alias Viewport =
+    { width : Int
+    , height : Int
+    }
+
+
 initialize : { settings : Settings, initialSeed : Int, viewport : Viewport } -> Model
 initialize params =
     Model
@@ -127,7 +134,13 @@ restart : Model -> Model
 restart (Model model) =
     let
         ( initialQuad, seed2 ) =
-            Random.step (Quad.initialQuadGenerator model.viewport.scene) model.seed
+            Random.step
+                (Quad.initialQuadGenerator
+                    { width = toFloat model.viewport.width
+                    , height = toFloat model.viewport.height
+                    }
+                )
+                model.seed
     in
     Model
         { seed = seed2
@@ -180,21 +193,23 @@ subdivideStep (Model model) =
 view : Model -> Svg Never
 view (Model model) =
     let
-        viewBoxHelp nums =
-            List.map String.fromFloat nums
-                |> String.join " "
+        widthStr =
+            String.fromInt model.viewport.width
+
+        heighStr =
+            String.fromInt model.viewport.height
 
         viewBoxStr =
-            viewBoxHelp
-                [ 0
-                , 0
-                , model.viewport.scene.width
-                , model.viewport.scene.height
+            String.join " "
+                [ "0"
+                , "0"
+                , widthStr
+                , heighStr
                 ]
     in
     Svg.svg
-        [ Svg.Attributes.width "100%"
-        , Svg.Attributes.height "100%"
+        [ Svg.Attributes.width widthStr
+        , Svg.Attributes.height heighStr
         , Svg.Attributes.viewBox viewBoxStr
         , Svg.Attributes.style "background-color: #f5f5f5"
         ]
