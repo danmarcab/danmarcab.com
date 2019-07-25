@@ -7,7 +7,8 @@ prod = process.env.NODE_ENV === 'production';
 
 flags = {
     showUnpublished: !prod,
-    unparsedPosts: posts
+    unparsedPosts: posts,
+    viewport: { width: window.innerWidth, height: window.innerHeight}
 };
 
 app.init({flags: flags});

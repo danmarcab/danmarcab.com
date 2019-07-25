@@ -44,9 +44,10 @@ view config model =
 contentView : Config -> Model -> Element Msg
 contentView config model =
     Element.el
-        [ Element.paddingXY config.spacing.large config.spacing.medium
+        [ Element.height Element.fill
+        , Element.width Element.fill
+        , Element.paddingXY config.spacing.large config.spacing.medium
         , Element.alignTop
-        , Element.height Element.fill
         ]
     <|
         Element.map never (model.post.content config)

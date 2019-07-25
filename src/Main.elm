@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Browser
+import Browser.Events
 import Browser.Navigation as Navigation
 import Config exposing (Config)
 import Data.PostList as PostList exposing (PostList)
@@ -37,6 +38,7 @@ type Msg
     | HomeMsg Home.Msg
     | PostMsg Post.Msg
     | QuadDivisionMsg QuadDivision.Msg
+    | Resized Int Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -91,6 +93,9 @@ update msg model =
         ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
 
+        ( Resized width height, _ ) ->
+            ( { model | config = Config.fromViewport { width = width, height = height } }, Cmd.none )
+
 
 view : Model -> Browser.Document Msg
 view model =
@@ -127,7 +132,7 @@ view model =
                 NotFound ->
                     NotFound.view model.config
     in
-    { title = pageDocument.title ++ " - danmarcab.com"
+    { title = pageDocument.title ++ " - danmarcab.com "
     , body =
         [ Element.layout
             [ Font.family
@@ -166,7 +171,7 @@ subscriptions model =
     in
     Sub.batch
         [ pageSubscriptions
-        , Sub.none
+        , Browser.Events.onResize Resized
         ]
 
 
@@ -195,11 +200,7 @@ init flags url navKey =
 
             else
                 PostList.filter .published posts
-      , config =
-            { colors = Config.lightModeColors
-            , spacing = Config.desktopSpacing
-            , fontSize = Config.desktopFontSize
-            }
+      , config = Config.fromViewport flags.viewport
       }
     , cmd
     )
@@ -208,6 +209,10 @@ init flags url navKey =
 type alias Flags =
     { showUnpublished : Bool
     , unparsedPosts : JD.Value
+    , viewport :
+        { width : Int
+        , height : Int
+        }
     }
 
 

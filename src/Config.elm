@@ -1,8 +1,6 @@
 module Config exposing
     ( Config
-    , desktopFontSize
-    , desktopSpacing
-    , lightModeColors
+    , fromViewport
     )
 
 import Element exposing (Color)
@@ -12,6 +10,7 @@ type alias Config =
     { colors : Colors
     , spacing : Spacing
     , fontSize : FontSize
+    , device : Element.Device
     }
 
 
@@ -45,6 +44,31 @@ type alias Colors =
     }
 
 
+fromViewport : { width : Int, height : Int } -> Config
+fromViewport viewport =
+    let
+        device =
+            Element.classifyDevice viewport
+    in
+    { colors = lightModeColors
+    , spacing =
+        case device.class of
+            Element.Phone ->
+                phoneSpacing
+
+            _ ->
+                desktopSpacing
+    , fontSize =
+        case device.class of
+            Element.Phone ->
+                phoneFontSize
+
+            _ ->
+                desktopFontSize
+    , device = device
+    }
+
+
 lightModeColors : Colors
 lightModeColors =
     { text = Element.rgb 0.1 0.1 0.1
@@ -68,6 +92,16 @@ desktopSpacing =
     }
 
 
+phoneSpacing : Spacing
+phoneSpacing =
+    { tiny = 3
+    , small = 6
+    , medium = 12
+    , large = 25
+    , extraLarge = 50
+    }
+
+
 desktopFontSize : FontSize
 desktopFontSize =
     { tiny = 12
@@ -75,4 +109,14 @@ desktopFontSize =
     , medium = 20
     , large = 26
     , extraLarge = 32
+    }
+
+
+phoneFontSize : FontSize
+phoneFontSize =
+    { tiny = 8
+    , small = 12
+    , medium = 16
+    , large = 20
+    , extraLarge = 24
     }
