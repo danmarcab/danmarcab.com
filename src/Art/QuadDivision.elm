@@ -8,6 +8,7 @@ module Art.QuadDivision exposing
     , generate
     , initialize
     , restart
+    , setSeed
     , settings
     , subdivideStep
     , view
@@ -112,6 +113,12 @@ initialize params =
         , viewport = params.viewport
         , settings = params.settings
         }
+        |> restart
+
+
+setSeed : Int -> Model -> Model
+setSeed seed (Model model) =
+    Model { model | seed = Random.initialSeed seed }
         |> restart
 
 
