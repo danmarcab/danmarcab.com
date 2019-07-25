@@ -11,7 +11,12 @@ import FeatherIcons
 view : Config -> { pageTitle : String, contentView : Element msg } -> Element msg
 view config { pageTitle, contentView } =
     Element.column
-        [ Element.width (Element.px 1000)
+        [ case config.device.class of
+            Element.Phone ->
+                Element.width Element.fill
+
+            _ ->
+                Element.width (Element.px 1000)
         , Element.centerX
         , Border.shadow
             { blur = toFloat config.spacing.tiny
@@ -34,7 +39,7 @@ menuView config pageTitle =
     Element.row
         [ Element.alignTop
         , Element.alignLeft
-        , Element.paddingXY config.spacing.medium config.spacing.small
+        , Element.paddingXY config.spacing.large config.spacing.small
         , Background.color config.colors.headerBackground
         , Font.color config.colors.headerText
         , Border.roundEach

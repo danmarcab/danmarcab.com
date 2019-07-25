@@ -53,13 +53,24 @@ contentView config posts _ =
         [ Element.paragraph [ Font.size config.fontSize.medium ]
             [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
             ]
-        , Element.row
-            [ Element.width Element.fill
-            , Element.spacing config.spacing.large
-            ]
-            [ postsView config posts
-            , experimentsView config
-            ]
+        , case config.device.class of
+            Element.Phone ->
+                Element.column
+                    [ Element.width Element.fill
+                    , Element.spacing config.spacing.large
+                    ]
+                    [ postsView config posts
+                    , experimentsView config
+                    ]
+
+            _ ->
+                Element.row
+                    [ Element.width Element.fill
+                    , Element.spacing config.spacing.large
+                    ]
+                    [ postsView config posts
+                    , experimentsView config
+                    ]
         ]
 
 
@@ -128,6 +139,7 @@ experimentPreview config experiment =
                 , label =
                     Element.el
                         [ Font.color config.colors.primary
+                        , Font.size config.fontSize.medium
                         ]
                     <|
                         Element.text "See more..."
@@ -158,50 +170,10 @@ postPreview config post =
         [ Element.spacing config.spacing.small
         , Element.width Element.fill
         ]
-        [ Element.column
-            [ Element.spacing config.spacing.tiny
-            , Element.width Element.fill
+        [ postTitleView config post
+        , Element.column
+            [ Element.spacing config.spacing.small
             ]
-            [ Element.link []
-                { url = Route.toUrlString (Route.Post post.id)
-                , label = postHeader config post.title
-                }
-            , Element.row
-                [ Element.spacing config.spacing.medium
-                , Font.size config.fontSize.small
-                , Element.width Element.fill
-                , Font.color config.colors.secondaryText
-                ]
-                [ let
-                    startText =
-                        if post.published then
-                            "Published on "
-
-                        else
-                            "DRAFT!! To be published on "
-                  in
-                  Element.text <|
-                    startText
-                        ++ String.join " "
-                            [ String.fromInt <| Time.toDay Time.utc post.publishedDate
-                            , monthToString <| Time.toMonth Time.utc post.publishedDate
-                            , String.fromInt <| Time.toYear Time.utc post.publishedDate
-                            ]
-                , Element.row [ Element.spacing config.spacing.tiny ]
-                    (List.map
-                        (\tag ->
-                            Element.el
-                                [ Font.color config.colors.primary
-                                ]
-                            <|
-                                Element.text tag
-                        )
-                        post.tags
-                        |> List.intersperse (Element.text "|")
-                    )
-                ]
-            ]
-        , Element.column [ Element.spacing config.spacing.small ]
             [ Element.paragraph
                 [ Font.size config.fontSize.medium
                 ]
@@ -211,11 +183,67 @@ postPreview config post =
                 , label =
                     Element.el
                         [ Font.color config.colors.primary
+                        , Font.size config.fontSize.medium
                         ]
                     <|
                         Element.text "Read more..."
                 }
             ]
+        ]
+
+
+postTitleView : Config -> Post -> Element msg
+postTitleView config post =
+    let
+        headerLink =
+            Element.link []
+                { url = Route.toUrlString (Route.Post post.id)
+                , label = postHeader config post.title
+                }
+
+        startText =
+            if post.published then
+                ""
+
+            else
+                "DRAFT!! "
+
+        publishedDate =
+            Element.text <|
+                startText
+                    ++ String.join " "
+                        [ String.fromInt <| Time.toDay Time.utc post.publishedDate
+                        , monthToString <| Time.toMonth Time.utc post.publishedDate
+                        , String.fromInt <| Time.toYear Time.utc post.publishedDate
+                        ]
+
+        tags =
+            List.map
+                (\tag ->
+                    Element.el
+                        [ Font.color config.colors.primary
+                        , Border.width 1
+                        , Element.padding config.spacing.tiny
+                        , Border.rounded config.spacing.tiny
+                        ]
+                    <|
+                        Element.text tag
+                )
+                post.tags
+    in
+    Element.column
+        [ Element.spacing config.spacing.tiny
+        , Element.width Element.fill
+        , Font.size config.fontSize.small
+        , Font.color config.colors.secondaryText
+        ]
+    <|
+        [ headerLink
+        , Element.wrappedRow
+            [ Element.spacingXY config.spacing.small config.spacing.tiny
+            , Element.width Element.fill
+            ]
+            (publishedDate :: tags)
         ]
 
 

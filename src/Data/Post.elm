@@ -235,14 +235,17 @@ image =
                 ]
                 [ Element.image
                     [ Element.centerX
+                    , Element.width Element.fill
                     ]
                     { src = src, description = description }
-                , Element.el
+                , Element.paragraph
                     [ Element.centerX
+                    , Font.center
                     , Font.color config.colors.secondaryText
+                    , Font.size config.fontSize.medium
                     ]
-                  <|
-                    Element.text description
+                    [ Element.text description
+                    ]
                 ]
         )
         |> Mark.field "src" Mark.string
