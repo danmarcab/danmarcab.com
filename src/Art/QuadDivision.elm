@@ -215,7 +215,8 @@ view (Model model) =
                 ]
     in
     Svg.svg
-        [ Svg.Attributes.width widthStr
+        [ Svg.Attributes.id "quad-division"
+        , Svg.Attributes.width widthStr
         , Svg.Attributes.height heighStr
         , Svg.Attributes.viewBox viewBoxStr
         , Svg.Attributes.style "background-color: #f5f5f5"
