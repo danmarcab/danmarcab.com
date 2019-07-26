@@ -15,6 +15,7 @@ import Time
 type alias Model =
     { settings : Settings
     , settingsOpen : Bool
+    , running : Bool
     , internal : QuadDivision.Model
     , viewport : Viewport
     }
@@ -32,10 +33,12 @@ type alias Settings =
 
 
 type Msg
-    = Subdivide
+    = Tick
     | InitSeed Int
     | UpdateEveryChanged Float
     | InternalSettingChanged QuadDivision.SettingChange
+    | Pause
+    | Resume
     | Restart
     | OpenSettings
     | CloseSettings
@@ -47,6 +50,9 @@ init config =
             { updateEvery = 100
             }
       , settingsOpen = False
+
+      -- this should be false but set to True due to a bug with subscriptions not triggering
+      , running = True
       , internal =
             QuadDivision.initialize
                 { initialSeed = 1
@@ -62,13 +68,19 @@ init config =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Subdivide ->
-            ( { model | internal = QuadDivision.subdivideStep model.internal }
-            , Cmd.none
-            )
+        Tick ->
+            if QuadDivision.done model.internal then
+                ( { model | running = False }
+                , Cmd.none
+                )
+
+            else
+                ( { model | internal = QuadDivision.subdivideStep model.internal }
+                , Cmd.none
+                )
 
         InitSeed seed ->
-            ( { model | internal = QuadDivision.setSeed seed model.internal }
+            ( { model | internal = QuadDivision.setSeed seed model.internal, running = True }
             , Cmd.none
             )
 
@@ -89,8 +101,18 @@ update msg model =
             , Cmd.none
             )
 
+        Pause ->
+            ( { model | running = False }
+            , Cmd.none
+            )
+
+        Resume ->
+            ( { model | running = True }
+            , Cmd.none
+            )
+
         Restart ->
-            ( { model | internal = QuadDivision.restart model.internal }
+            ( { model | internal = QuadDivision.restart model.internal, running = True }
             , Cmd.none
             )
 
@@ -122,14 +144,65 @@ view config model =
 
 foregroundView : Config -> Model -> Element Msg
 foregroundView config model =
-    Element.column
-        [ Element.spacing config.spacing.small
-        , Element.alignTop
-        , Element.alignLeft
-        ]
-        [ headerView config
-        , settingsView config model
-        ]
+    case config.device.class of
+        Element.Phone ->
+            Element.column
+                [ Element.alignTop
+                , Element.width Element.fill
+                , Element.height Element.fill
+                ]
+                [ Element.el
+                    [ Element.alignTop
+                    , Element.alignLeft
+                    ]
+                  <|
+                    headerView config
+                , Element.column
+                    [ Element.alignBottom
+                    , Element.alignRight
+                    , Element.spacing config.spacing.tiny
+                    ]
+                    [ Element.el
+                        [ Element.alignRight
+                        ]
+                      <|
+                        settingsView config model
+                    , Element.el
+                        [ Element.alignRight
+                        ]
+                      <|
+                        controlsView config model
+                    ]
+                ]
+
+        _ ->
+            Element.row
+                [ Element.alignTop
+                , Element.width Element.fill
+                ]
+                [ Element.el
+                    [ Element.alignTop
+                    , Element.alignLeft
+                    ]
+                  <|
+                    headerView config
+                , Element.column
+                    [ Element.alignTop
+                    , Element.alignRight
+                    , Element.spacing config.spacing.tiny
+                    ]
+                    [ Element.el
+                        [ Element.alignRight
+                        ]
+                      <|
+                        controlsView config model
+                    , Element.el
+                        [ Element.alignRight
+                        ]
+                      <|
+                        settingsView config model
+                    ]
+                ]
 
 
 headerView : Config -> Element Msg
@@ -140,7 +213,12 @@ headerView config =
         , Element.paddingXY config.spacing.large config.spacing.small
         , Background.color (Element.rgba255 0 0 0 0.75)
         , Font.color (Element.rgba255 255 255 255 1)
-        , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 0, bottomRight = config.spacing.small }
+        , Border.roundEach
+            { topLeft = 0
+            , topRight = 0
+            , bottomLeft = 0
+            , bottomRight = config.spacing.small
+            }
         , Element.spacing config.spacing.medium
         , Font.size config.fontSize.large
         , Font.bold
@@ -152,6 +230,70 @@ headerView config =
         , divider
         , Element.el [] <| Element.text "Quad Division"
         ]
+
+
+controlsView : Config -> Model -> Element Msg
+controlsView config model =
+    let
+        buttons =
+            [ Input.button [ Element.padding config.spacing.small ]
+                { onPress = Just Restart
+                , label = icon FeatherIcons.refreshCw
+                }
+            , if QuadDivision.done model.internal then
+                Input.button [ Element.padding config.spacing.small ]
+                    { onPress = Just OpenSettings
+                    , label = icon FeatherIcons.download
+                    }
+
+              else if model.running then
+                Input.button [ Element.padding config.spacing.small ]
+                    { onPress = Just Pause
+                    , label = icon FeatherIcons.pause
+                    }
+
+              else
+                Input.button [ Element.padding config.spacing.small ]
+                    { onPress = Just Resume
+                    , label = icon FeatherIcons.play
+                    }
+            , Input.button [ Element.padding config.spacing.small ]
+                { onPress =
+                    Just
+                        (if model.settingsOpen then
+                            CloseSettings
+
+                         else
+                            OpenSettings
+                        )
+                , label = icon FeatherIcons.settings
+                }
+            ]
+    in
+    Element.row
+        [ Element.paddingXY config.spacing.small 0
+        , Background.color (Element.rgba255 0 0 0 0.75)
+        , Font.color (Element.rgba255 255 255 255 1)
+        , case config.device.class of
+            Element.Phone ->
+                Border.roundEach
+                    { topLeft = config.spacing.small
+                    , topRight = 0
+                    , bottomLeft = 0
+                    , bottomRight = 0
+                    }
+
+            _ ->
+                Border.roundEach
+                    { topLeft = 0
+                    , topRight = 0
+                    , bottomLeft = config.spacing.small
+                    , bottomRight = 0
+                    }
+        , Font.size config.fontSize.large
+        , Font.bold
+        ]
+        buttons
 
 
 divider : Element Msg
@@ -173,10 +315,10 @@ settingsView config model =
         , Background.color (Element.rgba255 0 0 0 0.8)
         , Font.color (Element.rgba255 255 255 255 1)
         , Border.roundEach
-            { topLeft = 0
-            , topRight = config.spacing.small
-            , bottomLeft = 0
-            , bottomRight = config.spacing.small
+            { topLeft = config.spacing.small
+            , topRight = 0
+            , bottomLeft = config.spacing.small
+            , bottomRight = 0
             }
         , Font.size config.fontSize.medium
         ]
@@ -185,10 +327,7 @@ settingsView config model =
             openSettingsView config model
 
         else
-            Input.button [ Element.padding config.spacing.small ]
-                { onPress = Just OpenSettings
-                , label = icon FeatherIcons.settings
-                }
+            Element.none
 
 
 openSettingsView : Config -> Model -> Element Msg
@@ -235,9 +374,6 @@ openSettingsView config model =
             ]
         ]
             ++ internalSettingsView config model.internal
-            ++ [ Input.button buttonStyle
-                    { onPress = Just Restart, label = Element.text "Restart" }
-               ]
 
 
 internalSettingsView : Config -> QuadDivision.Model -> List (Element Msg)
@@ -339,11 +475,11 @@ icon i =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if QuadDivision.done model.internal then
-        Sub.none
+    if model.running then
+        Time.every model.settings.updateEvery (always Tick)
 
     else
-        Time.every model.settings.updateEvery (always Subdivide)
+        Sub.none
 
 
 
