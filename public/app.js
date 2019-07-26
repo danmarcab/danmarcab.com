@@ -1,15 +1,26 @@
-// Elm app
-app = require("../src/Main.elm").Elm.Main;
+import {Elm} from "../src/Main.elm";
 
-posts = require("../posts/*.txt");
+import posts from "../posts/*.txt";
 
-prod = process.env.NODE_ENV === 'production';
+const prod = process.env.NODE_ENV === 'production';
 
-flags = {
+const flags = {
     showUnpublished: !prod,
     unparsedPosts: posts,
     viewport: { width: window.innerWidth, height: window.innerHeight}
 };
 
-app.init({flags: flags});
+const app = Elm.Main.init({flags: flags});
+
+app.ports.downloadSvg.subscribe(svgId => {
+    const svg = document.getElementById(svgId);
+    const svgAsXML = (new XMLSerializer).serializeToString(svg);
+    const dataURL = "data:image/svg+xml," + encodeURIComponent(svgAsXML);
+
+    const dl = document.createElement("a");
+    document.body.appendChild(dl); // This line makes it work in Firefox.
+    dl.setAttribute("href", dataURL);
+    dl.setAttribute("download", `${svgId}.svg`);
+    dl.click();
+});
 

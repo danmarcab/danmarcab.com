@@ -8,6 +8,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import Ports
 import Random
 import Time
 
@@ -42,6 +43,7 @@ type Msg
     | Restart
     | OpenSettings
     | CloseSettings
+    | DownloadSvg
 
 
 init : Config -> ( Model, Cmd Msg )
@@ -124,6 +126,11 @@ update msg model =
         CloseSettings ->
             ( { model | settingsOpen = False }
             , Cmd.none
+            )
+
+        DownloadSvg ->
+            ( model
+            , Ports.downloadSvg "quad-division"
             )
 
 
@@ -242,7 +249,7 @@ controlsView config model =
                 }
             , if QuadDivision.done model.internal then
                 Input.button [ Element.padding config.spacing.small ]
-                    { onPress = Just OpenSettings
+                    { onPress = Just DownloadSvg
                     , label = icon FeatherIcons.download
                     }
 
