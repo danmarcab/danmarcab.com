@@ -44,6 +44,15 @@ view config posts model =
 
 contentView : Config -> PostList -> Model -> Element Msg
 contentView config posts _ =
+    let
+        responsive =
+            case config.device.class of
+                Element.Phone ->
+                    { layoutDirection = Element.column }
+
+                _ ->
+                    { layoutDirection = Element.row }
+    in
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
@@ -53,24 +62,13 @@ contentView config posts _ =
         [ Element.paragraph [ Font.size config.fontSize.medium ]
             [ Element.text "Welcome! I am Daniel, a London based software engineer. I hope you have fun!"
             ]
-        , case config.device.class of
-            Element.Phone ->
-                Element.column
-                    [ Element.width Element.fill
-                    , Element.spacing config.spacing.large
-                    ]
-                    [ postsView config posts
-                    , experimentsView config
-                    ]
-
-            _ ->
-                Element.row
-                    [ Element.width Element.fill
-                    , Element.spacing config.spacing.large
-                    ]
-                    [ postsView config posts
-                    , experimentsView config
-                    ]
+        , responsive.layoutDirection
+            [ Element.width Element.fill
+            , Element.spacing config.spacing.large
+            ]
+            [ postsView config posts
+            , experimentsView config
+            ]
         ]
 
 

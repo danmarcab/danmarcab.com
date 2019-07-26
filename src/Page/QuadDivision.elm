@@ -16,15 +16,9 @@ import Time
 type alias Model =
     { settings : Settings
     , settingsOpen : Bool
+    , fullScreen : Bool
     , running : Bool
     , internal : QuadDivision.Model
-    , viewport : Viewport
-    }
-
-
-type alias Viewport =
-    { width : Int
-    , height : Int
     }
 
 
@@ -43,6 +37,8 @@ type Msg
     | Restart
     | OpenSettings
     | CloseSettings
+    | EnterFullScreen
+    | ExitFullScreen
     | DownloadSvg
 
 
@@ -52,6 +48,7 @@ init config =
             { updateEvery = 100
             }
       , settingsOpen = False
+      , fullScreen = False
 
       -- this should be false but set to True due to a bug with subscriptions not triggering
       , running = True
@@ -61,7 +58,6 @@ init config =
                 , viewport = config.viewport
                 , settings = QuadDivision.defaultSettings config.viewport
                 }
-      , viewport = config.viewport
       }
     , Random.generate InitSeed anyInt
     )
@@ -128,6 +124,16 @@ update msg model =
             , Cmd.none
             )
 
+        EnterFullScreen ->
+            ( { model | fullScreen = True }
+            , Cmd.none
+            )
+
+        ExitFullScreen ->
+            ( { model | fullScreen = False }
+            , Cmd.none
+            )
+
         DownloadSvg ->
             ( model
             , Ports.downloadSvg "quad-division"
@@ -151,65 +157,65 @@ view config model =
 
 foregroundView : Config -> Model -> Element Msg
 foregroundView config model =
-    case config.device.class of
-        Element.Phone ->
-            Element.column
-                [ Element.alignTop
-                , Element.width Element.fill
-                , Element.height Element.fill
-                ]
-                [ Element.el
-                    [ Element.alignTop
-                    , Element.alignLeft
-                    ]
-                  <|
-                    headerView config
-                , Element.column
-                    [ Element.alignBottom
-                    , Element.alignRight
-                    , Element.spacing config.spacing.tiny
-                    ]
-                    [ Element.el
-                        [ Element.alignRight
-                        ]
-                      <|
-                        settingsView config model
-                    , Element.el
-                        [ Element.alignRight
-                        ]
-                      <|
-                        controlsView config model
-                    ]
-                ]
+    let
+        header =
+            if model.fullScreen then
+                Element.none
 
-        _ ->
-            Element.row
-                [ Element.alignTop
-                , Element.width Element.fill
-                ]
-                [ Element.el
+            else
+                Element.el
                     [ Element.alignTop
                     , Element.alignLeft
                     ]
-                  <|
+                <|
                     headerView config
-                , Element.column
-                    [ Element.alignTop
-                    , Element.alignRight
-                    , Element.spacing config.spacing.tiny
-                    ]
-                    [ Element.el
-                        [ Element.alignRight
+
+        settings =
+            if model.fullScreen then
+                Element.none
+
+            else
+                alignedRight <| settingsView config model
+
+        controls =
+            alignedRight <| controlsView config model
+
+        alignedRight el =
+            Element.el [ Element.alignRight ] el
+
+        responsive =
+            case config.device.class of
+                Element.Phone ->
+                    { layoutDirection = Element.column
+                    , menuAlignment = Element.alignBottom
+                    , menuItems =
+                        [ settings
+                        , controls
                         ]
-                      <|
-                        controlsView config model
-                    , Element.el
-                        [ Element.alignRight
+                    }
+
+                _ ->
+                    { layoutDirection = Element.row
+                    , menuAlignment = Element.alignTop
+                    , menuItems =
+                        [ controls
+                        , settings
                         ]
-                      <|
-                        settingsView config model
-                    ]
-                ]
+                    }
+    in
+    responsive.layoutDirection
+        [ Element.alignTop
+        , Element.width Element.fill
+        , Element.height Element.fill
+        ]
+        [ header
+        , Element.column
+            [ responsive.menuAlignment
+            , Element.alignRight
+            , Element.spacing config.spacing.tiny
+            ]
+            responsive.menuItems
+        ]
 
 
 headerView : Config -> Element Msg
@@ -242,61 +248,85 @@ headerView config =
 controlsView : Config -> Model -> Element Msg
 controlsView config model =
     let
+        button msg iconType =
+            Input.button [ Element.padding config.spacing.small ]
+                { onPress = Just msg
+                , label = icon iconType
+                }
+
+        restartButton =
+            button Restart FeatherIcons.refreshCw
+
+        downloadButton =
+            button DownloadSvg FeatherIcons.download
+
+        pauseButton =
+            button Pause FeatherIcons.pause
+
+        resumeButton =
+            button Resume FeatherIcons.play
+
+        settingsButton =
+            button
+                (if model.settingsOpen then
+                    CloseSettings
+
+                 else
+                    OpenSettings
+                )
+                FeatherIcons.settings
+
+        enterFullScreenButton =
+            button EnterFullScreen FeatherIcons.maximize
+
+        exitFullScreenButton =
+            button ExitFullScreen FeatherIcons.minimize
+
         buttons =
-            [ Input.button [ Element.padding config.spacing.small ]
-                { onPress = Just Restart
-                , label = icon FeatherIcons.refreshCw
-                }
-            , if QuadDivision.done model.internal then
-                Input.button [ Element.padding config.spacing.small ]
-                    { onPress = Just DownloadSvg
-                    , label = icon FeatherIcons.download
+            if model.fullScreen then
+                [ exitFullScreenButton ]
+
+            else
+                [ restartButton
+                , if QuadDivision.done model.internal then
+                    downloadButton
+
+                  else if model.running then
+                    pauseButton
+
+                  else
+                    resumeButton
+                , settingsButton
+                , enterFullScreenButton
+                ]
+
+        responsive =
+            case config.device.class of
+                Element.Phone ->
+                    { border =
+                        Border.roundEach
+                            { topLeft = config.spacing.small
+                            , topRight = 0
+                            , bottomLeft = 0
+                            , bottomRight = 0
+                            }
                     }
 
-              else if model.running then
-                Input.button [ Element.padding config.spacing.small ]
-                    { onPress = Just Pause
-                    , label = icon FeatherIcons.pause
+                _ ->
+                    { border =
+                        Border.roundEach
+                            { topLeft = 0
+                            , topRight = 0
+                            , bottomLeft = config.spacing.small
+                            , bottomRight = 0
+                            }
                     }
-
-              else
-                Input.button [ Element.padding config.spacing.small ]
-                    { onPress = Just Resume
-                    , label = icon FeatherIcons.play
-                    }
-            , Input.button [ Element.padding config.spacing.small ]
-                { onPress =
-                    Just
-                        (if model.settingsOpen then
-                            CloseSettings
-
-                         else
-                            OpenSettings
-                        )
-                , label = icon FeatherIcons.settings
-                }
-            ]
     in
     Element.row
         [ Element.paddingXY config.spacing.small 0
         , Background.color (Element.rgba255 0 0 0 0.75)
         , Font.color (Element.rgba255 255 255 255 1)
-        , case config.device.class of
-            Element.Phone ->
-                Border.roundEach
-                    { topLeft = config.spacing.small
-                    , topRight = 0
-                    , bottomLeft = 0
-                    , bottomRight = 0
-                    }
-
-            _ ->
-                Border.roundEach
-                    { topLeft = 0
-                    , topRight = 0
-                    , bottomLeft = config.spacing.small
-                    , bottomRight = 0
-                    }
+        , responsive.border
         , Font.size config.fontSize.large
         , Font.bold
         ]

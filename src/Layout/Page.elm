@@ -10,13 +10,20 @@ import FeatherIcons
 
 view : Config -> { pageTitle : String, contentView : Element msg } -> Element msg
 view config { pageTitle, contentView } =
-    Element.column
-        [ case config.device.class of
-            Element.Phone ->
-                Element.width Element.fill
+    let
+        responsive =
+            case config.device.class of
+                Element.Phone ->
+                    { width = Element.fill }
 
-            _ ->
-                Element.width (Element.px 1000)
+                Element.Tablet ->
+                    { width = Element.fill }
+
+                _ ->
+                    { width = Element.px 1000 }
+    in
+    Element.column
+        [ Element.width responsive.width
         , Element.centerX
         , Border.shadow
             { blur = toFloat config.spacing.tiny
