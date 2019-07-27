@@ -93,6 +93,14 @@ update msg model =
         ( QuadDivisionMsg _, _ ) ->
             ( model, Cmd.none )
 
+        ( Resized width height, QuadDivision subModel ) ->
+            ( { model
+                | config = Config.fromViewport { width = width, height = height }
+                , page = QuadDivision (QuadDivision.resize { width = width, height = height } subModel)
+              }
+            , Cmd.none
+            )
+
         ( Resized width height, _ ) ->
             ( { model | config = Config.fromViewport { width = width, height = height } }, Cmd.none )
 

@@ -7,6 +7,7 @@ module Art.QuadDivision exposing
     , done
     , generate
     , initialize
+    , resize
     , restart
     , setSeed
     , settings
@@ -135,6 +136,12 @@ generate params =
     in
     initialize params
         |> loop
+
+
+resize : Viewport -> Model -> Model
+resize viewport (Model model) =
+    Model { model | viewport = viewport }
+        |> restart
 
 
 restart : Model -> Model
