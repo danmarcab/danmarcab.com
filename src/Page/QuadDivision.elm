@@ -1,4 +1,4 @@
-module Page.QuadDivision exposing (Model, Msg, init, subscriptions, update, view)
+module Page.QuadDivision exposing (Model, Msg, init, resize, subscriptions, update, view)
 
 import Art.QuadDivision as QuadDivision
 import Config exposing (Config)
@@ -140,6 +140,11 @@ update msg model =
             )
 
 
+resize : { width : Int, height : Int } -> Model -> Model
+resize viewport model =
+    { model | internal = QuadDivision.resize viewport model.internal, running = True }
+
+
 view : Config -> Model -> { title : String, body : Element Msg }
 view config model =
     { title = "Quad Division"
@@ -186,6 +191,15 @@ foregroundView config model =
         responsive =
             case config.device.class of
                 Element.Phone ->
+                    { layoutDirection = Element.column
+                    , menuAlignment = Element.alignBottom
+                    , menuItems =
+                        [ settings
+                        , controls
+                        ]
+                    }
+
+                Element.Tablet ->
                     { layoutDirection = Element.column
                     , menuAlignment = Element.alignBottom
                     , menuItems =
