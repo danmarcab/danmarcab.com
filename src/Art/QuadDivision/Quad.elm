@@ -22,7 +22,7 @@ type DivideType
 
 
 canSubdivide :
-    { separation : Float, minSide : Float, minArea : Float }
+    { minSide : Float, minArea : Float }
     -> Quad
     -> Bool
 canSubdivide opts quad =
@@ -48,7 +48,7 @@ type SubdivisionOption
 
 
 howCanSubdivide :
-    { separation : Float, minSide : Float, minArea : Float }
+    { minSide : Float, minArea : Float }
     -> Quad
     -> SubdivisionOption
 howCanSubdivide { minSide, minArea } { polygon } =
@@ -93,7 +93,7 @@ howCanSubdivide { minSide, minArea } { polygon } =
 
 subdivide :
     Random.Seed
-    -> { separation : Float, minSide : Float, minArea : Float }
+    -> { minSide : Float, minArea : Float }
     -> Quad
     -> ( Random.Seed, List Quad )
 subdivide seed opts ({ prevDivide } as quad) =

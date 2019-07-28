@@ -1,9 +1,9 @@
 module Art.QuadDivision exposing
     ( Model
+    , QuadQuantity(..)
     , SettingChange(..)
     , Settings
     , changeSetting
-    , defaultSettings
     , done
     , generate
     , initialize
@@ -31,9 +31,12 @@ import Util.Collection as Collection exposing (Collection)
 
 type alias Settings =
     { separation : Float
-    , minSide : Float
-    , minArea : Float
+    , quantity : QuadQuantity
     }
+
+
+type QuadQuantity
+    = About Int
 
 
 settings : Model -> Settings
@@ -41,28 +44,28 @@ settings (Model model) =
     model.settings
 
 
-defaultSettings : Viewport -> Settings
-defaultSettings viewport =
+toInternalSettings : Model -> { minSide : Float, minArea : Float }
+toInternalSettings (Model model) =
     let
-        separation =
-            min viewport.width viewport.height
-                |> toFloat
-                |> (\num -> num / 1000.0)
-                |> round
-                |> max 1
-                |> (\num -> num * 5)
-                |> toFloat
+        viewportArea =
+            model.viewport.width * model.viewport.height
+
+        minArea =
+            case model.settings.quantity of
+                About num ->
+                    1.5 * toFloat viewportArea / toFloat num
+
+        minSide =
+            sqrt minArea * 0.5
     in
-    { separation = separation
-    , minSide = separation * 20
-    , minArea = separation * separation * 1000
+    { minArea = minArea
+    , minSide = minSide
     }
 
 
 type SettingChange
     = ChangeSeparation Float
-    | ChangeMinSide Float
-    | ChangeMinArea Float
+    | ChangeQuantity QuadQuantity
 
 
 changeSetting : SettingChange -> Model -> Model
@@ -76,11 +79,8 @@ changeSetting change (Model model) =
                 ChangeSeparation newSeparation ->
                     { oldSettings | separation = newSeparation }
 
-                ChangeMinSide newMinSide ->
-                    { oldSettings | minSide = newMinSide }
-
-                ChangeMinArea newMinArea ->
-                    { oldSettings | minArea = newMinArea }
+                ChangeQuantity newQuantity ->
+                    { oldSettings | quantity = newQuantity }
     in
     Model { model | settings = newSettings }
 
@@ -179,15 +179,18 @@ subdivideStep (Model model) =
                     (List.map (\idx -> ( 1, idx )) (Collection.indices model.quads))
                 )
                 model.seed
+
+        simulationSettings =
+            toInternalSettings (Model model)
     in
     case Collection.get indexToSubdivide model.quads of
         Just quad ->
             let
                 ( nextSeed, dividedQuads ) =
-                    Quad.subdivide newSeed model.settings quad
+                    Quad.subdivide newSeed simulationSettings quad
 
                 ( divisibleQuads, staticQuads ) =
-                    List.partition (Quad.canSubdivide model.settings) dividedQuads
+                    List.partition (Quad.canSubdivide simulationSettings) dividedQuads
             in
             Model
                 { model

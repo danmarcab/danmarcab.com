@@ -56,7 +56,10 @@ init config =
             QuadDivision.initialize
                 { initialSeed = 1
                 , viewport = config.viewport
-                , settings = QuadDivision.defaultSettings config.viewport
+                , settings =
+                    { separation = 5
+                    , quantity = QuadDivision.About 50
+                    }
                 }
       }
     , Random.generate InitSeed anyInt
@@ -389,42 +392,38 @@ openSettingsView config model =
         , Element.width Element.shrink
         ]
     <|
-        [ Element.column
+        [ Element.el
             [ Element.width Element.fill
-            , Element.spacing config.spacing.tiny
+            , Border.widthEach { top = 0, right = 0, left = 0, bottom = 1 }
+            , Element.paddingEach { top = 0, right = 0, left = 0, bottom = config.spacing.small }
             ]
-            [ Element.row [ Element.width Element.fill ]
+          <|
+            Element.row [ Element.width Element.fill ]
                 [ Element.el [ Font.size config.fontSize.large ] <|
                     Element.text "Settings"
                 , Input.button (buttonStyle ++ [ Element.alignRight, Element.alignTop ])
                     { onPress = Just CloseSettings, label = Element.text "Close" }
                 ]
-            , Element.paragraph [ Font.size config.fontSize.small ]
-                [ Element.text "Change the settings and see how they affect the result"
-                ]
-            ]
-        , Element.column [ Element.width Element.fill, Element.spacing 5 ]
-            [ Input.slider sliderStyle
-                { onChange = UpdateEveryChanged
-                , label =
-                    Input.labelAbove []
-                        (Element.text <|
-                            "Subdivide Every ("
-                                ++ String.fromFloat model.settings.updateEvery
-                                ++ " ms)"
-                        )
-                , min = 50
-                , max = 1000
-                , value = model.settings.updateEvery
-                , thumb = Input.defaultThumb
-                , step = Just 25
-                }
-            , Element.paragraph [ Font.size config.fontSize.small ]
-                [ Element.text "How often to subdivide Quads"
-                ]
-            ]
+        , Input.radioRow [ Element.spacing config.spacing.medium ]
+            { onChange = UpdateEveryChanged
+            , options =
+                List.map
+                    (\( num, lab ) -> radioOption config num <| Element.text lab)
+                    [ ( 25, "Fast" ), ( 100, "Medium" ), ( 500, "Slow" ) ]
+            , selected = Just model.settings.updateEvery
+            , label =
+                Input.labelAbove
+                    [ Font.size config.fontSize.medium
+                    , Element.paddingEach { top = 0, left = 0, right = 0, bottom = config.spacing.tiny }
+                    ]
+                <|
+                    Element.text "Subdivision speed"
+            }
         ]
             ++ internalSettingsView config model.internal
+            ++ [ Input.button (buttonStyle ++ [ Element.alignRight, Element.alignTop ])
+                    { onPress = Just Restart, label = Element.text "Restart" }
+               ]
 
 
 internalSettingsView : Config -> QuadDivision.Model -> List (Element Msg)
@@ -433,75 +432,66 @@ internalSettingsView config model =
         internalSettings =
             QuadDivision.settings model
     in
-    [ Element.column [ Element.width Element.fill, Element.spacing config.spacing.tiny ]
-        [ Input.slider sliderStyle
-            { onChange = InternalSettingChanged << QuadDivision.ChangeSeparation
-            , label =
-                Input.labelAbove []
-                    (Element.text <|
-                        "Quad separation ("
-                            ++ String.fromFloat internalSettings.separation
-                            ++ " px)"
-                    )
-            , min = 0
-            , max = 25
-            , value = internalSettings.separation
-            , thumb = Input.defaultThumb
-            , step = Just 1
-            }
-        , Element.paragraph [ Font.size config.fontSize.small ]
-            [ Element.text "Width of the gap between Quads"
-            ]
-        ]
-    , Element.column [ Element.width Element.fill, Element.spacing config.spacing.tiny ]
-        [ Input.slider sliderStyle
-            { onChange = InternalSettingChanged << QuadDivision.ChangeMinArea
-            , label =
-                Input.labelAbove []
-                    (Element.text <|
-                        "Quad min area ("
-                            ++ String.fromFloat internalSettings.minArea
-                            ++ " px sq)"
-                    )
-            , min = 5000
-            , max = 100000
-            , value = internalSettings.minArea
-            , thumb = Input.defaultThumb
-            , step = Just 5000
-            }
-        , Element.paragraph [ Font.size config.fontSize.small ]
-            [ Element.text "Minimum area a Quad needs to be divided"
-            ]
-        ]
-    , Element.column [ Element.width Element.fill, Element.spacing config.spacing.tiny ]
-        [ Input.slider sliderStyle
-            { onChange = InternalSettingChanged << QuadDivision.ChangeMinSide
-            , label =
-                Input.labelAbove []
-                    (Element.text <|
-                        "Minimum side length ("
-                            ++ String.fromFloat internalSettings.minSide
-                            ++ " px)"
-                    )
-            , min = 50
-            , max = 1000
-            , value = internalSettings.minSide
-            , thumb = Input.defaultThumb
-            , step = Just 50
-            }
-        , Element.paragraph [ Font.size config.fontSize.small ]
-            [ Element.text "Width of the gap between Quads"
-            ]
-        ]
+    [ Input.radioRow [ Element.spacing config.spacing.medium ]
+        { onChange = InternalSettingChanged << QuadDivision.ChangeSeparation
+        , options =
+            List.map
+                (\num -> radioOption config num <| Element.text (String.fromFloat num))
+                [ 1, 2, 5, 10 ]
+        , selected = Just internalSettings.separation
+        , label =
+            Input.labelAbove
+                [ Font.size config.fontSize.medium
+                , Element.paddingEach { top = 0, left = 0, right = 0, bottom = config.spacing.tiny }
+                ]
+            <|
+                Element.text "Border width in pixels"
+        }
+    , Input.radioRow [ Element.spacing config.spacing.medium ]
+        { onChange = InternalSettingChanged << QuadDivision.ChangeQuantity
+        , options =
+            List.map
+                (\num -> radioOption config (QuadDivision.About num) <| Element.text (String.fromInt num))
+                [ 20, 50, 100, 200 ]
+        , selected = Just internalSettings.quantity
+        , label =
+            Input.labelAbove
+                [ Font.size config.fontSize.medium
+                , Element.paddingEach { top = 0, left = 0, right = 0, bottom = config.spacing.tiny }
+                ]
+            <|
+                Element.text "Approximate number of quads"
+        }
     ]
 
 
-sliderStyle : List (Element.Attribute msg)
-sliderStyle =
-    [ Border.width 1
-    , Border.color (Element.rgba255 255 255 255 0.5)
-    , Background.color (Element.rgba255 255 255 255 0.05)
-    ]
+radioOption : Config -> val -> Element msg -> Input.Option val msg
+radioOption config val optView =
+    let
+        baseWith bgColor iconType =
+            Element.row
+                [ Background.color bgColor
+                , Border.rounded config.spacing.small
+                , Element.paddingXY config.spacing.small config.spacing.tiny
+                , Element.spacing config.spacing.tiny
+                , Element.mouseOver [ Background.color (Element.rgba255 255 255 255 0.15) ]
+                ]
+                [ icon iconType
+                , optView
+                ]
+    in
+    Input.optionWith val
+        (\optionState ->
+            case optionState of
+                Input.Idle ->
+                    baseWith (Element.rgba255 255 255 255 0.1) FeatherIcons.circle
+
+                Input.Focused ->
+                    baseWith (Element.rgba255 255 255 255 0.1) FeatherIcons.stopCircle
+
+                Input.Selected ->
+                    baseWith (Element.rgba255 255 255 255 0.3) FeatherIcons.checkCircle
+        )
 
 
 buttonStyle : List (Element.Attribute msg)
