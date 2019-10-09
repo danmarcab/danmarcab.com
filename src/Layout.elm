@@ -6,6 +6,7 @@ import Metadata exposing (Metadata)
 import Pages
 import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
+import Widget.Footer as Footer
 import Widget.Header as Header
 import Widget.Sidebar as Sidebar
 
@@ -68,6 +69,7 @@ withHeaderAndTwoColumns viewSettings { description, leftColumn, rightColumn } =
                 ]
                 rightColumn
             ]
+        , Footer.view viewSettings
         ]
 
 
@@ -86,4 +88,5 @@ withHeader viewSettings { content } =
         ]
         [ Header.view viewSettings { description = "A blog where I write about computer science, generative art and other random stuff" }
         , content
+        , Footer.view viewSettings
         ]

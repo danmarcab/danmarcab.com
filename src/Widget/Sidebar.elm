@@ -1,13 +1,16 @@
 module Widget.Sidebar exposing (view)
 
 import Element exposing (Element)
+import Element.Border as Border
 import Element.Font as Font
+import FeatherIcons as Icon
 import Metadata exposing (Metadata(..))
 import Pages
 import Pages.ImagePath as ImagePath
 import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.EmailList as EmailList
+import Widget.Footer as Footer
 import Widget.LatestPosts as LatestPosts
 import Widget.Sitename as Sitename
 
@@ -20,7 +23,23 @@ view viewSettings siteMetadata _ =
         , Element.alignTop
         , Element.spacing viewSettings.spacing.md
         ]
-        [ Sitename.view viewSettings
+        [ Element.el
+            [ Element.width Element.fill
+            , Border.widthEach
+                { top = 0
+                , right = 0
+                , bottom = 5
+                , left = 0
+                }
+            , Element.paddingEach
+                { top = 0
+                , right = 0
+                , bottom = viewSettings.spacing.sm
+                , left = 0
+                }
+            ]
+          <|
+            Sitename.view viewSettings
 
         --            , currentlyReading
         --            , related (tags?)
@@ -30,7 +49,8 @@ view viewSettings siteMetadata _ =
 
         --        , followTwitter
         --        , github
-        , Element.row [ Element.spacing viewSettings.spacing.xl ]
-            []
-        , Element.el [ Font.size viewSettings.font.size.sm ] <| Element.text "© 2019 - present Daniel Marin Cabillas"
+        , Element.column [ Element.spacing viewSettings.spacing.sm ]
+            [ Footer.profilesView viewSettings
+            , Footer.copyrightView viewSettings
+            ]
         ]

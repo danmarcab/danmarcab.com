@@ -4,7 +4,6 @@
 - Homepage
   - Projects
     - Internal link (QuadDivision)
-  - Links to github / twitter
 - Revisit SEO
   - Images
 
