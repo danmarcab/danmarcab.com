@@ -31,19 +31,6 @@ view viewSettings siteMetadata _ =
         --        , followTwitter
         --        , github
         , Element.row [ Element.spacing viewSettings.spacing.xl ]
-            [ githubRepoLink viewSettings
-            ]
+            []
         , Element.el [ Font.size viewSettings.font.size.sm ] <| Element.text "© 2019 - present Daniel Marin Cabillas"
         ]
-
-
-githubRepoLink : ViewSettings -> Element msg
-githubRepoLink viewSettings =
-    Element.newTabLink []
-        { url = "https://github.com/danmarcab/"
-        , label =
-            Element.image
-                [ Element.width (Element.px viewSettings.spacing.md)
-                ]
-                { src = ImagePath.toString Pages.images.github, description = "Github profile" }
-        }

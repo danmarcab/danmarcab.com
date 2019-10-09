@@ -34,7 +34,7 @@ manifest =
     , themeColor = Just Color.white
     , startUrl = pages.index
     , shortName = Just "danmarcab.com"
-    , sourceIcon = images.github
+    , sourceIcon = images.icon
     }
 
 
@@ -168,11 +168,11 @@ head : Metadata -> List (Head.Tag Pages.PathKey)
 head metadata =
     case metadata of
         Metadata.Homepage meta ->
-            Seo.summaryLarge
+            Seo.summary
                 { canonicalUrlOverride = Nothing
                 , siteName = "danmarcab.com"
                 , image =
-                    { url = images.github
+                    { url = images.icon
                     , alt = "danmarcab.com logo"
                     , dimensions = Nothing
                     , mimeType = Nothing
