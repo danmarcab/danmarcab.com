@@ -107,9 +107,6 @@ takePosts { postsToShow, siteMetadata } =
         siteMetadata
         |> List.sortBy (\( _, { published } ) -> Date.toRataDie published)
         |> List.take postsToShow
-        --        REMOVE
-        |> List.repeat postsToShow
-        |> List.concat
 
 
 listHeading : ViewSettings -> Mode -> Element msg

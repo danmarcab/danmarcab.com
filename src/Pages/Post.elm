@@ -1,14 +1,12 @@
-module Pages.Post exposing (..)
+module Pages.Post exposing (view)
 
 import Date
 import Element exposing (Element)
-import Element.Background as Background
 import Element.Font as Font
 import Element.Region
 import Layout
 import Metadata exposing (Metadata, PostMetadata)
 import Pages
-import Pages.ImagePath as ImagePath exposing (ImagePath)
 import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
@@ -28,9 +26,9 @@ view viewSettings siteMetadata page =
                 , Element.centerX
                 , Element.padding viewSettings.spacing.lg
                 ]
-                (postTitleView viewSettings page.metadata
-                    :: [ page.view ]
-                )
+                [ postTitleView viewSettings page.metadata
+                , page.view
+                ]
 
 
 postTitleView : ViewSettings -> PostMetadata -> Element msg

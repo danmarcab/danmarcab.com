@@ -1,4 +1,4 @@
-module Widget.ProjectCard exposing (..)
+module Widget.ProjectCard exposing (view)
 
 import Date
 import Element exposing (Element)

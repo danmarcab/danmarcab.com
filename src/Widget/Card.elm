@@ -60,6 +60,7 @@ linkWithImage viewSettings { url, imagePath, openInNewTab, imageDescription, con
         }
 
 
+linkRenderer : Bool -> List (Element.Attribute msg) -> { url : String, label : Element msg } -> Element msg
 linkRenderer openInNewTab =
     if openInNewTab then
         Element.newTabLink

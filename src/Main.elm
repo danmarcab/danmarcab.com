@@ -5,20 +5,17 @@ import Date
 import Element exposing (Element)
 import Element.Background as Background
 import Element.Font as Font
-import Element.Region
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
-import Layout
 import Markdown
 import Metadata exposing (Metadata)
 import Pages exposing (images, pages)
 import Pages.Document
 import Pages.Homepage
-import Pages.ImagePath as ImagePath exposing (ImagePath)
 import Pages.Manifest as Manifest
 import Pages.Manifest.Category
-import Pages.PagePath as PagePath exposing (PagePath)
+import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import Pages.Post
 import Pages.Project

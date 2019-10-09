@@ -8,14 +8,16 @@
     "build": "elm-pages build"
   },
   "author": "Daniel Marin Cabillas",
-  "license": "",
+  "license": "MIT",
   "dependencies": {
     "highlight.js": "^9.15.10",
     "node-sass": "^4.12.0"
   },
   "devDependencies": {
     "elm": "^0.19.0-no-deps",
+    "elm-analyse": "^0.16.4",
     "elm-format": "^0.8.2",
+    "elm-json": "^0.2.1",
     "elm-pages": "1.0.36",
     "http-server": "^0.11.1"
   }

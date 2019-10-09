@@ -13,7 +13,7 @@ import Widget.Sitename as Sitename
 
 
 view : ViewSettings -> List ( PagePath Pages.PathKey, Metadata ) -> PagePath Pages.PathKey -> Element msg
-view viewSettings siteMetadata currentPath =
+view viewSettings siteMetadata _ =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill

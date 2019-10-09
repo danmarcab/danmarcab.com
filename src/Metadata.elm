@@ -1,8 +1,6 @@
 module Metadata exposing (HomepageMetadata, Metadata(..), PostMetadata, ProjectMetadata, decoder)
 
 import Date exposing (Date)
-import Dict exposing (Dict)
-import Element exposing (Element)
 import Json.Decode as Decode exposing (Decoder)
 import List.Extra
 import Pages
@@ -41,6 +39,7 @@ type alias ProjectMetadata =
     }
 
 
+decoder : Decoder Metadata
 decoder =
     Decode.field "type" Decode.string
         |> Decode.andThen

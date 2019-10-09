@@ -1,4 +1,4 @@
-module ViewSettings exposing (..)
+module ViewSettings exposing (ViewSettings, default)
 
 import Element
 

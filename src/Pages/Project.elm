@@ -1,13 +1,9 @@
-module Pages.Project exposing (..)
+module Pages.Project exposing (view)
 
-import Date
 import Element exposing (Element)
-import Element.Font as Font
-import Element.Region
 import Layout
-import Metadata exposing (Metadata, PostMetadata, ProjectMetadata)
+import Metadata exposing (Metadata, ProjectMetadata)
 import Pages
-import Pages.ImagePath as ImagePath exposing (ImagePath)
 import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
@@ -19,7 +15,7 @@ view :
     -> List ( PagePath Pages.PathKey, Metadata )
     -> Page ProjectMetadata (Element msg) Pages.PathKey
     -> Element msg
-view viewSettings siteMetadata page =
+view viewSettings _ page =
     case page.metadata.externalUrl of
         Just _ ->
             viewExternalProject viewSettings page

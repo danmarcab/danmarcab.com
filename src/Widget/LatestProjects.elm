@@ -60,9 +60,6 @@ takeProjects { projectsToShow, siteMetadata } =
         siteMetadata
         |> List.sortBy (\( _, { published } ) -> Date.toRataDie published)
         |> List.take projectsToShow
-        --        REMOVE
-        |> List.repeat projectsToShow
-        |> List.concat
 
 
 listHeading : ViewSettings -> Element msg

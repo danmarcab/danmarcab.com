@@ -1,13 +1,8 @@
-module Widget.EmailList exposing (..)
+module Widget.EmailList exposing (view)
 
 import Element
 import Element.Font as Font
 import ViewSettings exposing (ViewSettings)
-
-
-sitename : String
-sitename =
-    "JOIN EMAIL"
 
 
 view : ViewSettings -> Element.Element msg
@@ -20,5 +15,5 @@ view viewSettings =
                 , Font.bold
                 ]
             <|
-                Element.text sitename
+                Element.text "JOIN EMAIL"
         }

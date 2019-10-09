@@ -1,4 +1,4 @@
-module Widget.Sitename exposing (..)
+module Widget.Sitename exposing (view)
 
 import Element exposing (Element)
 import Element.Font as Font
