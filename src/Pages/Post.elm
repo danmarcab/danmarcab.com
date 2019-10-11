@@ -11,24 +11,37 @@ import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
 import Widget.Card as Card
+import Widget.EmailList as EmailList
+
+
+type alias MsgConfig msg =
+    { onEmailUpdate : String -> msg }
 
 
 view :
-    ViewSettings
-    -> List ( PagePath Pages.PathKey, Metadata )
-    -> Page PostMetadata (Element msg) Pages.PathKey
+    { viewSettings : ViewSettings
+    , emailList : EmailList.Model msg
+    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , page : Page PostMetadata (Element msg) Pages.PathKey
+    }
     -> Element msg
-view viewSettings siteMetadata page =
-    Layout.withSidebar viewSettings siteMetadata page.path <|
-        Card.plain viewSettings <|
-            Element.column
-                [ Element.spacing viewSettings.spacing.md
-                , Element.centerX
-                , Element.padding viewSettings.spacing.lg
-                ]
-                [ postTitleView viewSettings page.metadata
-                , page.view
-                ]
+view { viewSettings, emailList, siteMetadata, page } =
+    Layout.withSidebar
+        { viewSettings = viewSettings
+        , emailList = emailList
+        , siteMetadata = siteMetadata
+        , currentPath = page.path
+        , content =
+            Card.plain viewSettings <|
+                Element.column
+                    [ Element.spacing viewSettings.spacing.md
+                    , Element.centerX
+                    , Element.padding viewSettings.spacing.lg
+                    ]
+                    [ postTitleView viewSettings page.metadata
+                    , page.view
+                    ]
+        }
 
 
 postTitleView : ViewSettings -> PostMetadata -> Element msg

@@ -20,6 +20,7 @@ type alias FontSettings =
         { primary : Color
         , secondary : Color
         , tertiary : Color
+        , error : Color
         }
     }
 
@@ -31,6 +32,7 @@ type alias ColorSettings =
     , mainBackground : Color
     , contentBackground : Color
     , shadow : Color
+    , innerShadow : Color
     }
 
 
@@ -50,6 +52,7 @@ default =
             { primary = Element.rgb 0.2 0.2 0.2
             , secondary = Element.rgb 0.4 0.4 0.4
             , tertiary = Element.rgb 0.6 0.6 0.6
+            , error = Element.rgb 0.9 0.2 0.2
             }
         , size =
             { xs = 14
@@ -73,5 +76,6 @@ default =
         , mainBackground = Element.rgb255 245 243 242
         , contentBackground = Element.rgb 1 1 1
         , shadow = Element.rgb 0.8 0.8 0.8
+        , innerShadow = Element.rgb 0.9 0.9 0.9
         }
     }

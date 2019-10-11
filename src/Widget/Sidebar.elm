@@ -15,8 +15,14 @@ import Widget.LatestPosts as LatestPosts
 import Widget.Sitename as Sitename
 
 
-view : ViewSettings -> List ( PagePath Pages.PathKey, Metadata ) -> PagePath Pages.PathKey -> Element msg
-view viewSettings siteMetadata _ =
+view :
+    { viewSettings : ViewSettings
+    , emailList : EmailList.Model msg
+    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , currentPath : PagePath Pages.PathKey
+    }
+    -> Element msg
+view { viewSettings, emailList, siteMetadata } =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
@@ -45,12 +51,25 @@ view viewSettings siteMetadata _ =
         --            , related (tags?)
         --            , posts in the same series
         , LatestPosts.compact viewSettings { postsToShow = 3, siteMetadata = siteMetadata }
-        , EmailList.view viewSettings
-
-        --        , followTwitter
-        --        , github
-        , Element.column [ Element.spacing viewSettings.spacing.sm ]
-            [ Footer.profilesView viewSettings
+        , Element.column
+            [ Element.alignBottom
+            , Element.spacing viewSettings.spacing.sm
+            , Element.width Element.fill
+            , Border.widthEach
+                { top = 5
+                , right = 0
+                , bottom = 0
+                , left = 0
+                }
+            , Element.paddingEach
+                { top = viewSettings.spacing.sm
+                , right = 0
+                , bottom = 0
+                , left = 0
+                }
+            ]
+            [ EmailList.view viewSettings emailList
+            , Footer.profilesView viewSettings
             , Footer.copyrightView viewSettings
             ]
         ]

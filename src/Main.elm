@@ -8,6 +8,7 @@ import Element.Font as Font
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
+import Http
 import Markdown
 import Metadata exposing (Metadata)
 import Pages exposing (images, pages)
@@ -20,6 +21,7 @@ import Pages.Platform exposing (Page)
 import Pages.Post
 import Pages.Project
 import ViewSettings exposing (ViewSettings)
+import Widget.EmailList as EmailList
 
 
 manifest : Manifest.Config Pages.PathKey
@@ -78,23 +80,55 @@ markdownDocument =
 
 type alias Model =
     { viewSettings : ViewSettings
+    , emailList : EmailList.Model Msg
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model ViewSettings.default, Cmd.none )
+    ( { viewSettings = ViewSettings.default
+      , emailList =
+            EmailList.init
+                { onChangeEmail = EmailTextUpdated
+                , onSubscribe = EmailSubscribe
+                , onResponse = SubscribeResponse
+                }
+      }
+    , Cmd.none
+    )
 
 
-type alias Msg =
-    ()
+type Msg
+    = EmailTextUpdated String
+    | EmailSubscribe
+    | SubscribeResponse (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ emailList } as model) =
     case msg of
-        () ->
-            ( model, Cmd.none )
+        EmailTextUpdated str ->
+            let
+                newEmailList =
+                    EmailList.updateEmail str model.emailList
+            in
+            ( { model | emailList = newEmailList }, Cmd.none )
+
+        EmailSubscribe ->
+            let
+                ( newEmailList, cmd ) =
+                    EmailList.makeRequest model.emailList
+            in
+            ( { model | emailList = newEmailList }
+            , cmd
+            )
+
+        SubscribeResponse res ->
+            let
+                newEmailList =
+                    EmailList.applyResponse res model.emailList
+            in
+            ( { model | emailList = newEmailList }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -124,37 +158,48 @@ view model siteMetadata page =
 
 pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata Rendered Pages.PathKey -> { title : String, body : Element Msg }
 pageView model siteMetadata page =
+    let
+        msgConfig =
+            { onEmailUpdate = EmailTextUpdated }
+    in
     case page.metadata of
         Metadata.Homepage metadata ->
             { title = metadata.title
             , body =
-                Pages.Homepage.view model.viewSettings
-                    siteMetadata
-                    { path = page.path
-                    , view = page.view
-                    , metadata = metadata
+                Pages.Homepage.view
+                    { viewSettings = model.viewSettings
+                    , emailList = model.emailList
+                    , siteMetadata = siteMetadata
                     }
             }
 
         Metadata.Post metadata ->
             { title = metadata.title
             , body =
-                Pages.Post.view model.viewSettings
-                    siteMetadata
-                    { path = page.path
-                    , view = page.view
-                    , metadata = metadata
+                Pages.Post.view
+                    { viewSettings = model.viewSettings
+                    , emailList = model.emailList
+                    , siteMetadata = siteMetadata
+                    , page =
+                        { path = page.path
+                        , view = page.view
+                        , metadata = metadata
+                        }
                     }
             }
 
         Metadata.Project metadata ->
             { title = metadata.title
             , body =
-                Pages.Project.view model.viewSettings
-                    siteMetadata
-                    { path = page.path
-                    , view = page.view
-                    , metadata = metadata
+                Pages.Project.view
+                    { viewSettings = model.viewSettings
+                    , emailList = model.emailList
+                    , siteMetadata = siteMetadata
+                    , page =
+                        { path = page.path
+                        , view = page.view
+                        , metadata = metadata
+                        }
                     }
             }
 

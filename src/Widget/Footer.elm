@@ -5,13 +5,12 @@ import Element.Border as Border
 import Element.Font as Font
 import FeatherIcons as Icon
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList
+import Widget.EmailList as EmailList
 import Widget.Icon as Icon
-import Widget.Sitename as Sitename
 
 
-view : ViewSettings -> Element msg
-view viewSettings =
+view : { viewSettings : ViewSettings, emailList : EmailList.Model msg } -> Element msg
+view { viewSettings, emailList } =
     Element.row
         [ Element.width Element.fill
         , Element.spaceEvenly
@@ -41,7 +40,7 @@ view viewSettings =
             [ profilesView viewSettings
             , copyrightView viewSettings
             ]
-        , Widget.EmailList.view viewSettings
+        , EmailList.view viewSettings emailList
         ]
 
 

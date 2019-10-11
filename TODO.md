@@ -6,11 +6,6 @@
     - Internal link (QuadDivision)
 - Revisit SEO
   - Images
-
-- Email list to MailChimp (blog post?)
-  - TextField
-  - Actually make the request
-
 - Source Code highlighting
 - Render elm embedded in page (blog post?)
     - Custom html by using https://github.com/dillonkearns/elm-markdown
@@ -26,3 +21,11 @@
 ## V0.3
 
 - Comment system
+
+## V0.4
+
+- Hook up Widget.EmailList component to MailChimp (blog post?)
+  - see commit 
+  - lambda/netlify function to circumvent CORS
+  - TextField
+  - Actually make the request

@@ -7,19 +7,25 @@ import Pages
 import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
+import Widget.EmailList as EmailList
 import Widget.LatestPosts as LatestPosts
 import Widget.LatestProjects as LatestProjects
 
 
+type alias MsgConfig msg =
+    { onEmailUpdate : String -> msg }
+
+
 view :
-    ViewSettings
-    -> List ( PagePath Pages.PathKey, Metadata )
-    -> Page HomepageMetadata (Element msg) Pages.PathKey
+    { viewSettings : ViewSettings
+    , emailList : EmailList.Model msg
+    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    }
     -> Element msg
-view viewSettings siteMetadata page =
+view { viewSettings, emailList, siteMetadata } =
     Layout.withHeaderAndTwoColumns
-        viewSettings
-        { description = page.metadata.description
+        { viewSettings = viewSettings
+        , emailList = emailList
         , leftColumn =
             LatestPosts.expanded viewSettings
                 { siteMetadata = siteMetadata, postsToShow = 5 }

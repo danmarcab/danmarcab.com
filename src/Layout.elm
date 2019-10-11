@@ -6,13 +6,25 @@ import Metadata exposing (Metadata)
 import Pages
 import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
+import Widget.EmailList as EmailList
 import Widget.Footer as Footer
 import Widget.Header as Header
 import Widget.Sidebar as Sidebar
 
 
-withSidebar : ViewSettings -> List ( PagePath Pages.PathKey, Metadata ) -> PagePath Pages.PathKey -> Element msg -> Element msg
-withSidebar viewSettings pagesInfo currentPagePath contentView =
+type alias MsgConfig msg =
+    { onEmailUpdate : String -> msg }
+
+
+withSidebar :
+    { viewSettings : ViewSettings
+    , emailList : EmailList.Model msg
+    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , currentPath : PagePath Pages.PathKey
+    , content : Element msg
+    }
+    -> Element msg
+withSidebar { viewSettings, emailList, siteMetadata, currentPath, content } =
     Element.row
         [ Element.width (Element.fill |> Element.maximum 1400)
         , Element.height Element.fill
@@ -25,25 +37,30 @@ withSidebar viewSettings pagesInfo currentPagePath contentView =
             , Element.Region.mainContent
             , Element.width (Element.fillPortion 3)
             ]
-            contentView
+            content
         , Element.el
             [ Element.width (Element.fillPortion 1)
             , Element.height Element.fill
             , Element.Region.navigation
             ]
-            (Sidebar.view viewSettings pagesInfo currentPagePath)
+            (Sidebar.view
+                { viewSettings = viewSettings
+                , emailList = emailList
+                , siteMetadata = siteMetadata
+                , currentPath = currentPath
+                }
+            )
         ]
 
 
 withHeaderAndTwoColumns :
-    ViewSettings
-    ->
-        { description : String
-        , leftColumn : Element msg
-        , rightColumn : Element msg
-        }
+    { viewSettings : ViewSettings
+    , emailList : EmailList.Model msg
+    , leftColumn : Element msg
+    , rightColumn : Element msg
+    }
     -> Element msg
-withHeaderAndTwoColumns viewSettings { description, leftColumn, rightColumn } =
+withHeaderAndTwoColumns { viewSettings, emailList, leftColumn, rightColumn } =
     Element.column
         [ Element.width (Element.fill |> Element.maximum 1400)
         , Element.height Element.fill
@@ -52,7 +69,7 @@ withHeaderAndTwoColumns viewSettings { description, leftColumn, rightColumn } =
         , Element.centerX
         , Element.Region.mainContent
         ]
-        [ Header.view viewSettings { description = description }
+        [ Header.view { viewSettings = viewSettings, emailList = emailList }
         , Element.row
             [ Element.width Element.fill
             , Element.height Element.fill
@@ -69,15 +86,14 @@ withHeaderAndTwoColumns viewSettings { description, leftColumn, rightColumn } =
                 ]
                 rightColumn
             ]
-        , Footer.view viewSettings
+        , Footer.view { viewSettings = viewSettings, emailList = emailList }
         ]
 
 
 withHeader :
-    ViewSettings
-    -> { content : Element msg }
+    { viewSettings : ViewSettings, emailList : EmailList.Model msg, content : Element msg }
     -> Element msg
-withHeader viewSettings { content } =
+withHeader { viewSettings, emailList, content } =
     Element.column
         [ Element.width (Element.fill |> Element.maximum 1400)
         , Element.height Element.fill
@@ -86,7 +102,7 @@ withHeader viewSettings { content } =
         , Element.centerX
         , Element.Region.mainContent
         ]
-        [ Header.view viewSettings { description = "A blog where I write about computer science, generative art and other random stuff" }
+        [ Header.view { viewSettings = viewSettings, emailList = emailList }
         , content
-        , Footer.view viewSettings
+        , Footer.view { viewSettings = viewSettings, emailList = emailList }
         ]

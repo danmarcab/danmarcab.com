@@ -3,12 +3,12 @@ module Widget.Header exposing (view)
 import Element exposing (Element)
 import Element.Border as Border
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList
+import Widget.EmailList as EmailList
 import Widget.Sitename as Sitename
 
 
-view : ViewSettings -> { description : String } -> Element msg
-view viewSettings { description } =
+view : { viewSettings : ViewSettings, emailList : EmailList.Model msg } -> Element msg
+view { viewSettings, emailList } =
     Element.row
         [ Element.width Element.fill
         , Element.spaceEvenly
@@ -36,7 +36,7 @@ view viewSettings { description } =
                 }
             ]
             [ Sitename.view viewSettings
-            , Element.paragraph [] [ Element.text description ]
+            , Element.paragraph [] [ Element.text "A blog where I write about computer science, generative art and other random stuff" ]
             ]
-        , Widget.EmailList.view viewSettings
+        , EmailList.view viewSettings emailList
         ]
