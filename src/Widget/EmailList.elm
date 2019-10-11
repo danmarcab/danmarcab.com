@@ -114,6 +114,14 @@ view viewSettings { onChangeEmail, email, onSubscribe, status } =
                 [ Element.paragraph [] [ Element.text "Thank you! We sent you a confirmation email, please click the link to finish the subscription process." ] ]
 
 
+input :
+    { viewSettings : ViewSettings
+    , label : String
+    , placeholder : String
+    , onChange : String -> msg
+    , value : String
+    }
+    -> Element.Element msg
 input { viewSettings, label, placeholder, onChange, value } =
     Input.text
         [ Element.padding viewSettings.spacing.sm
@@ -174,7 +182,7 @@ type ResponseAnalysis
 
 applyResponse : Result Http.Error String -> Model msg -> Model msg
 applyResponse result model =
-    case Debug.log "res" result of
+    case result of
         Err _ ->
             { model | status = Errored "Error, please try again" }
 

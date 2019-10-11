@@ -7,27 +7,20 @@ import Pages
 import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList as EmailList
 import Widget.ProjectCard as ProjectCard
-
-
-type alias MsgConfig msg =
-    { onEmailUpdate : String -> msg }
 
 
 view :
     { viewSettings : ViewSettings
-    , emailList : EmailList.Model msg
     , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
     , page : Page ProjectMetadata (Element msg) Pages.PathKey
     }
     -> Element msg
-view { viewSettings, emailList, page } =
+view { viewSettings, page } =
     case page.metadata.externalUrl of
         Just _ ->
             viewExternalProject
                 { viewSettings = viewSettings
-                , emailList = emailList
                 , page = page
                 }
 
@@ -37,14 +30,12 @@ view { viewSettings, emailList, page } =
 
 viewExternalProject :
     { viewSettings : ViewSettings
-    , emailList : EmailList.Model msg
     , page : Page ProjectMetadata (Element msg) Pages.PathKey
     }
     -> Element msg
-viewExternalProject { viewSettings, emailList, page } =
+viewExternalProject { viewSettings, page } =
     Layout.withHeader
         { viewSettings = viewSettings
-        , emailList = emailList
         , content =
             Element.column
                 [ Element.width (Element.fill |> Element.maximum 500)

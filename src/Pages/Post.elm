@@ -11,24 +11,17 @@ import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import ViewSettings exposing (ViewSettings)
 import Widget.Card as Card
-import Widget.EmailList as EmailList
-
-
-type alias MsgConfig msg =
-    { onEmailUpdate : String -> msg }
 
 
 view :
     { viewSettings : ViewSettings
-    , emailList : EmailList.Model msg
     , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
     , page : Page PostMetadata (Element msg) Pages.PathKey
     }
     -> Element msg
-view { viewSettings, emailList, siteMetadata, page } =
+view { viewSettings, siteMetadata, page } =
     Layout.withSidebar
         { viewSettings = viewSettings
-        , emailList = emailList
         , siteMetadata = siteMetadata
         , currentPath = page.path
         , content =

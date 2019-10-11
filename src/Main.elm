@@ -8,7 +8,6 @@ import Element.Font as Font
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
-import Http
 import Markdown
 import Metadata exposing (Metadata)
 import Pages exposing (images, pages)
@@ -21,7 +20,6 @@ import Pages.Platform exposing (Page)
 import Pages.Post
 import Pages.Project
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList as EmailList
 
 
 manifest : Manifest.Config Pages.PathKey
@@ -80,55 +78,23 @@ markdownDocument =
 
 type alias Model =
     { viewSettings : ViewSettings
-    , emailList : EmailList.Model Msg
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { viewSettings = ViewSettings.default
-      , emailList =
-            EmailList.init
-                { onChangeEmail = EmailTextUpdated
-                , onSubscribe = EmailSubscribe
-                , onResponse = SubscribeResponse
-                }
-      }
+    ( { viewSettings = ViewSettings.default }
     , Cmd.none
     )
 
 
-type Msg
-    = EmailTextUpdated String
-    | EmailSubscribe
-    | SubscribeResponse (Result Http.Error String)
+type alias Msg =
+    ()
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ emailList } as model) =
-    case msg of
-        EmailTextUpdated str ->
-            let
-                newEmailList =
-                    EmailList.updateEmail str model.emailList
-            in
-            ( { model | emailList = newEmailList }, Cmd.none )
-
-        EmailSubscribe ->
-            let
-                ( newEmailList, cmd ) =
-                    EmailList.makeRequest model.emailList
-            in
-            ( { model | emailList = newEmailList }
-            , cmd
-            )
-
-        SubscribeResponse res ->
-            let
-                newEmailList =
-                    EmailList.applyResponse res model.emailList
-            in
-            ( { model | emailList = newEmailList }, Cmd.none )
+update _ model =
+    ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -158,17 +124,12 @@ view model siteMetadata page =
 
 pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata Rendered Pages.PathKey -> { title : String, body : Element Msg }
 pageView model siteMetadata page =
-    let
-        msgConfig =
-            { onEmailUpdate = EmailTextUpdated }
-    in
     case page.metadata of
         Metadata.Homepage metadata ->
             { title = metadata.title
             , body =
                 Pages.Homepage.view
                     { viewSettings = model.viewSettings
-                    , emailList = model.emailList
                     , siteMetadata = siteMetadata
                     }
             }
@@ -178,7 +139,6 @@ pageView model siteMetadata page =
             , body =
                 Pages.Post.view
                     { viewSettings = model.viewSettings
-                    , emailList = model.emailList
                     , siteMetadata = siteMetadata
                     , page =
                         { path = page.path
@@ -193,7 +153,6 @@ pageView model siteMetadata page =
             , body =
                 Pages.Project.view
                     { viewSettings = model.viewSettings
-                    , emailList = model.emailList
                     , siteMetadata = siteMetadata
                     , page =
                         { path = page.path

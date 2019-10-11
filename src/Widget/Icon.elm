@@ -1,4 +1,4 @@
-module Widget.Icon exposing (..)
+module Widget.Icon exposing (view)
 
 import Element exposing (Color, Element)
 import Element.Font as Font

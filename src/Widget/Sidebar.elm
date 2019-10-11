@@ -2,14 +2,10 @@ module Widget.Sidebar exposing (view)
 
 import Element exposing (Element)
 import Element.Border as Border
-import Element.Font as Font
-import FeatherIcons as Icon
 import Metadata exposing (Metadata(..))
 import Pages
-import Pages.ImagePath as ImagePath
 import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList as EmailList
 import Widget.Footer as Footer
 import Widget.LatestPosts as LatestPosts
 import Widget.Sitename as Sitename
@@ -17,12 +13,11 @@ import Widget.Sitename as Sitename
 
 view :
     { viewSettings : ViewSettings
-    , emailList : EmailList.Model msg
     , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
     , currentPath : PagePath Pages.PathKey
     }
     -> Element msg
-view { viewSettings, emailList, siteMetadata } =
+view { viewSettings, siteMetadata } =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
@@ -68,7 +63,7 @@ view { viewSettings, emailList, siteMetadata } =
                 , left = 0
                 }
             ]
-            [ EmailList.view viewSettings emailList
+            [ Footer.mailingListView viewSettings
             , Footer.profilesView viewSettings
             , Footer.copyrightView viewSettings
             ]

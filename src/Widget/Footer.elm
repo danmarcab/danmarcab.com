@@ -1,17 +1,16 @@
-module Widget.Footer exposing (copyrightView, profilesView, view)
+module Widget.Footer exposing (copyrightView, mailingListView, profilesView, view)
 
 import Element exposing (Element)
 import Element.Border as Border
 import Element.Font as Font
 import FeatherIcons as Icon
 import ViewSettings exposing (ViewSettings)
-import Widget.EmailList as EmailList
 import Widget.Icon as Icon
 
 
-view : { viewSettings : ViewSettings, emailList : EmailList.Model msg } -> Element msg
-view { viewSettings, emailList } =
-    Element.row
+view : { viewSettings : ViewSettings } -> Element msg
+view { viewSettings } =
+    Element.wrappedRow
         [ Element.width Element.fill
         , Element.spaceEvenly
         , Border.widthEach
@@ -27,21 +26,16 @@ view { viewSettings, emailList } =
             , left = 0
             }
         ]
-        [ Element.column
-            [ Element.spacing viewSettings.spacing.sm
-            , Element.width Element.fill
-            , Element.paddingEach
-                { top = 0
-                , right = viewSettings.spacing.lg
-                , bottom = 0
-                , left = 0
-                }
-            ]
-            [ profilesView viewSettings
-            , copyrightView viewSettings
-            ]
-        , EmailList.view viewSettings emailList
+        [ mailingListView viewSettings
+        , profilesView viewSettings
+        , copyrightView viewSettings
         ]
+
+
+mailingListView : ViewSettings -> Element msg
+mailingListView viewSettings =
+    Element.row [ Font.size viewSettings.font.size.sm, Element.spacing viewSettings.spacing.md ]
+        [ Element.text "Subscribe to my mailing list:", mailListLink viewSettings ]
 
 
 profilesView : ViewSettings -> Element msg
@@ -50,9 +44,22 @@ profilesView viewSettings =
         [ Element.text "Find me on:", twitterLink viewSettings, githubLink viewSettings ]
 
 
+mailListLink : ViewSettings -> Element msg
+mailListLink viewSettings =
+    Element.newTabLink []
+        { url = "https://mailchi.mp/145ed6fd7df3/danmarcab"
+        , label =
+            Icon.view
+                { size = viewSettings.font.size.lg
+                , color = viewSettings.font.color.primary
+                }
+                Icon.mail
+        }
+
+
 twitterLink : ViewSettings -> Element msg
 twitterLink viewSettings =
-    Element.link []
+    Element.newTabLink []
         { url = "https://twitter.com/danmarcab"
         , label =
             Icon.view
@@ -65,7 +72,7 @@ twitterLink viewSettings =
 
 githubLink : ViewSettings -> Element msg
 githubLink viewSettings =
-    Element.link []
+    Element.newTabLink []
         { url = "https://github.com/danmarcab"
         , label =
             Icon.view
