@@ -8,34 +8,36 @@ import Pages.ImagePath as ImagePath exposing (ImagePath)
 import ViewSettings exposing (ViewSettings)
 
 
-plain : ViewSettings -> Element msg -> Element msg
-plain viewSettings content =
+plain : ViewSettings -> List (Element.Attribute msg) -> Element msg -> Element msg
+plain viewSettings attrs content =
     Element.el
-        (commonAttributes viewSettings)
+        (commonAttributes viewSettings ++ attrs)
         content
 
 
 link :
     ViewSettings
+    -> List (Element.Attribute msg)
     ->
         { url : String
         , openInNewTab : Bool
         , content : Element msg
         }
     -> Element msg
-link viewSettings { url, openInNewTab, content } =
+link viewSettings attrs { url, openInNewTab, content } =
     linkRenderer openInNewTab
         []
         { url = url
         , label =
             Element.el
-                (commonAttributes viewSettings ++ mouseOverAttributes viewSettings)
+                (commonAttributes viewSettings ++ mouseOverAttributes viewSettings ++ attrs)
                 content
         }
 
 
 linkWithImage :
     ViewSettings
+    -> List (Element.Attribute msg)
     ->
         { imagePath : ImagePath Pages.PathKey
         , imageDescription : String
@@ -44,13 +46,13 @@ linkWithImage :
         , content : Element msg
         }
     -> Element msg
-linkWithImage viewSettings { url, imagePath, openInNewTab, imageDescription, content } =
+linkWithImage viewSettings attrs { url, imagePath, openInNewTab, imageDescription, content } =
     linkRenderer openInNewTab
         []
         { url = url
         , label =
             Element.column
-                (commonAttributes viewSettings ++ mouseOverAttributes viewSettings)
+                (commonAttributes viewSettings ++ mouseOverAttributes viewSettings ++ attrs)
                 [ Element.image [ Element.width Element.fill ]
                     { src = ImagePath.toString imagePath
                     , description = imageDescription
@@ -69,7 +71,7 @@ linkRenderer openInNewTab =
         Element.link
 
 
-commonAttributes : ViewSettings -> List (Element.Attr () msg)
+commonAttributes : ViewSettings -> List (Element.Attribute msg)
 commonAttributes viewSettings =
     [ Background.color viewSettings.color.contentBackground
     , Border.shadow
@@ -81,7 +83,7 @@ commonAttributes viewSettings =
     ]
 
 
-mouseOverAttributes : ViewSettings -> List (Element.Attr () msg)
+mouseOverAttributes : ViewSettings -> List (Element.Attribute msg)
 mouseOverAttributes viewSettings =
     [ Element.mouseOver
         [ Element.moveUp 2

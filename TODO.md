@@ -6,7 +6,6 @@
 - Render elm embedded in page (blog post?)
     - Custom html by using https://github.com/dillonkearns/elm-markdown
     - Probably webcomponent needed to init the app in isolation
-- Fix layout (height fill wast working)
 - Deploy to netlify
 
 ## V0.2

@@ -25,7 +25,7 @@ view { viewSettings, siteMetadata, page } =
         , siteMetadata = siteMetadata
         , currentPath = page.path
         , content =
-            Card.plain viewSettings <|
+            Card.plain viewSettings [ Element.scrollbarY ] <|
                 Element.column
                     [ Element.spacing viewSettings.spacing.md
                     , Element.centerX

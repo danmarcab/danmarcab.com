@@ -53,6 +53,7 @@ expanded viewSettings opts =
 
         postCardView ( path, post ) =
             Card.link viewSettings
+                []
                 { url = PagePath.toString path
                 , openInNewTab = False
                 , content =

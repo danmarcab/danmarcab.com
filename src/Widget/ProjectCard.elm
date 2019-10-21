@@ -24,6 +24,7 @@ view viewSettings { path, project } =
                     ( False, PagePath.toString path )
     in
     Card.linkWithImage viewSettings
+        []
         { url = url
         , openInNewTab = external
         , imagePath = project.image
