@@ -9,6 +9,7 @@ import Head
 import Head.Seo as Seo
 import Html exposing (Html)
 import Markdown
+import MarkdownRenderer
 import Metadata exposing (Metadata)
 import Pages exposing (images, pages)
 import Pages.Document
@@ -47,7 +48,7 @@ type alias Rendered =
 -- main : Platform.Program Pages.Platform.Flags (Pages.Platform.Model Model Msg Metadata Rendered) (Pages.Platform.Msg Msg Metadata Rendered)
 
 
-main : Pages.Platform.Program Model Msg Metadata Rendered
+main : Pages.Platform.Program Model Msg Metadata (ViewSettings -> Rendered)
 main =
     Pages.application
         { init = init
@@ -61,18 +62,19 @@ main =
         }
 
 
-markdownDocument : ( String, Pages.Document.DocumentHandler Metadata Rendered )
+markdownDocument : ( String, Pages.Document.DocumentHandler Metadata (ViewSettings -> Rendered) )
 markdownDocument =
     Pages.Document.parser
         { extension = "md"
         , metadata = Metadata.decoder
         , body =
-            \markdownBody ->
-                Html.div [] [ Markdown.toHtml [] markdownBody ]
-                    |> Element.html
-                    |> List.singleton
-                    |> Element.paragraph [ Element.width Element.fill ]
-                    |> Ok
+            \content ->
+                MarkdownRenderer.view content
+                    |> Result.map
+                        (\( toc, contents ) ->
+                            \viewSettings ->
+                                Element.column [ Element.spacing 40 ] (List.map (\v -> v viewSettings) contents)
+                        )
         }
 
 
@@ -102,7 +104,7 @@ subscriptions _ =
     Sub.none
 
 
-view : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata Rendered Pages.PathKey -> { title : String, body : Html Msg }
+view : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey -> { title : String, body : Html Msg }
 view model siteMetadata page =
     let
         { title, body } =
@@ -122,7 +124,7 @@ view model siteMetadata page =
     }
 
 
-pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata Rendered Pages.PathKey -> { title : String, body : Element Msg }
+pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey -> { title : String, body : Element Msg }
 pageView model siteMetadata page =
     case page.metadata of
         Metadata.Homepage metadata ->
@@ -142,7 +144,7 @@ pageView model siteMetadata page =
                     , siteMetadata = siteMetadata
                     , page =
                         { path = page.path
-                        , view = page.view
+                        , view = page.view model.viewSettings
                         , metadata = metadata
                         }
                     }
@@ -156,7 +158,7 @@ pageView model siteMetadata page =
                     , siteMetadata = siteMetadata
                     , page =
                         { path = page.path
-                        , view = page.view
+                        , view = page.view model.viewSettings
                         , metadata = metadata
                         }
                     }
