@@ -114,6 +114,18 @@ renderer =
                         |> Element.el [ Element.centerX ]
                 )
                 |> Markdown.Html.withAttribute "url"
+            , Markdown.Html.tag "elm-app"
+                (\src appName children viewSettings ->
+                    Element.el [ Element.width Element.fill ] <|
+                        Element.html <|
+                            Html.node "elm-app"
+                                [ Html.Attributes.property "src" (Encode.string src)
+                                , Html.Attributes.property "appName" (Encode.string appName)
+                                ]
+                                []
+                )
+                |> Markdown.Html.withAttribute "src"
+                |> Markdown.Html.withAttribute "appName"
             ]
     }
 

@@ -8,7 +8,6 @@ import Element.Font as Font
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
-import Markdown
 import MarkdownRenderer
 import Metadata exposing (Metadata)
 import Pages exposing (images, pages)
