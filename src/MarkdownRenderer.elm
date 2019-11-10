@@ -1,7 +1,7 @@
 module MarkdownRenderer exposing (TableOfContents, view)
 
 import Element exposing (Element)
-import Element.Background
+import Element.Background as Background
 import Element.Border
 import Element.Font as Font
 import Element.Region
@@ -115,17 +115,23 @@ renderer =
                 )
                 |> Markdown.Html.withAttribute "url"
             , Markdown.Html.tag "elm-app"
-                (\src appName children viewSettings ->
-                    Element.el [ Element.width Element.fill ] <|
+                (\src appName flags children viewSettings ->
+                    Element.el
+                        [ Element.width Element.fill
+                        , Background.color viewSettings.color.mainBackground
+                        ]
+                    <|
                         Element.html <|
                             Html.node "elm-app"
                                 [ Html.Attributes.property "src" (Encode.string src)
                                 , Html.Attributes.property "appName" (Encode.string appName)
+                                , Html.Attributes.property "flags" (Encode.string flags)
                                 ]
                                 []
                 )
                 |> Markdown.Html.withAttribute "src"
                 |> Markdown.Html.withAttribute "appName"
+                |> Markdown.Html.withAttribute "flags"
             ]
     }
 
@@ -181,7 +187,7 @@ listView itemViews viewSettings =
 code : String -> ViewSettings -> Element msg
 code snippet viewSettings =
     Element.el
-        [ Element.Background.color viewSettings.color.mainBackground
+        [ Background.color viewSettings.color.mainBackground
         , Element.Border.rounded 2
         , Element.padding viewSettings.spacing.xs
         , Font.family [ Font.monospace ]
