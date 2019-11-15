@@ -106,7 +106,7 @@ takePosts { postsToShow, siteMetadata } =
                     Nothing
         )
         siteMetadata
-        |> List.sortBy (\( _, { published } ) -> Date.toRataDie published)
+        |> List.sortBy (\( _, { published } ) -> -(Date.toRataDie published))
         |> List.take postsToShow
 
 

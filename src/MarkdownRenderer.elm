@@ -2,9 +2,10 @@ module MarkdownRenderer exposing (TableOfContents, view)
 
 import Element exposing (Element)
 import Element.Background as Background
-import Element.Border
+import Element.Border as Border
 import Element.Font as Font
 import Element.Region
+import FeatherIcons
 import Html exposing (Attribute, Html)
 import Html.Attributes exposing (property)
 import Json.Encode as Encode exposing (Value)
@@ -12,7 +13,11 @@ import Markdown.Block
 import Markdown.Html
 import Markdown.Parser
 import Oembed
+import TreeDiagram
 import ViewSettings exposing (ViewSettings)
+import Widget.Figure as Figure
+import Widget.Icon as Icon
+import Widget.SimpleTree as SimpleTree
 
 
 buildToc : List Markdown.Block.Block -> TableOfContents
@@ -95,7 +100,9 @@ renderer =
                         [ Element.htmlAttribute (Html.Attributes.style "display" "inline-flex")
                         ]
                         { url = link.destination
-                        , label = Element.paragraph [] (List.map (\v -> v viewSettings) linkViews)
+                        , label =
+                            Element.paragraph [ Font.underline ]
+                                (List.map (\v -> v viewSettings) linkViews)
                         }
     , image =
         \image body ->
@@ -132,6 +139,43 @@ renderer =
                 |> Markdown.Html.withAttribute "src"
                 |> Markdown.Html.withAttribute "appName"
                 |> Markdown.Html.withAttribute "flags"
+            , Markdown.Html.tag "custom-figure"
+                (\description children viewSettings ->
+                    let
+                        renderedChildren =
+                            Element.row
+                                [ Element.spaceEvenly
+                                , Element.spacing viewSettings.spacing.md
+                                , Element.width Element.fill
+                                ]
+                            <|
+                                List.map (\child -> child viewSettings) children
+                    in
+                    Figure.view viewSettings description renderedChildren
+                )
+                |> Markdown.Html.withAttribute "description"
+            , Markdown.Html.tag "simple-tree"
+                (\preorder nodes edgesTo children viewSettings ->
+                    SimpleTree.fromString preorder
+                        |> Maybe.map
+                            (\tree ->
+                                SimpleTree.view viewSettings
+                                    { highlightEdgesTo =
+                                        edgesTo
+                                            |> Maybe.andThen SimpleTree.highlightFromString
+                                            |> Maybe.withDefault []
+                                    , highlightNodes =
+                                        nodes
+                                            |> Maybe.andThen SimpleTree.highlightFromString
+                                            |> Maybe.withDefault []
+                                    }
+                                    tree
+                            )
+                        |> Maybe.withDefault (Element.text "Invalid Tree")
+                )
+                |> Markdown.Html.withAttribute "preorder"
+                |> Markdown.Html.withOptionalAttribute "highlight-nodes"
+                |> Markdown.Html.withOptionalAttribute "highlight-edges-to"
             ]
     }
 
@@ -157,7 +201,6 @@ heading { level, rawText, children } viewSettings =
                     viewSettings.font.size.md
             )
         , Font.bold
-        , Font.family [ Font.typeface "Montserrat" ]
         , Element.Region.heading level
         , Element.htmlAttribute
             (Html.Attributes.attribute "name" (rawTextToId rawText))
@@ -188,7 +231,7 @@ code : String -> ViewSettings -> Element msg
 code snippet viewSettings =
     Element.el
         [ Background.color viewSettings.color.mainBackground
-        , Element.Border.rounded 2
+        , Border.rounded 2
         , Element.padding viewSettings.spacing.xs
         , Font.family [ Font.monospace ]
         ]

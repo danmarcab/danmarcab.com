@@ -72,7 +72,11 @@ markdownDocument =
                     |> Result.map
                         (\( toc, contents ) ->
                             \viewSettings ->
-                                Element.column [ Element.spacing 40 ] (List.map (\v -> v viewSettings) contents)
+                                Element.column
+                                    [ Element.spacing viewSettings.spacing.lg
+                                    , Element.width Element.fill
+                                    ]
+                                    (List.map (\v -> v viewSettings) contents)
                         )
         }
 

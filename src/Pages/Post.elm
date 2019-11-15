@@ -25,11 +25,16 @@ view { viewSettings, siteMetadata, page } =
         , siteMetadata = siteMetadata
         , currentPath = page.path
         , content =
-            Card.plain viewSettings [ Element.scrollbarY ] <|
+            Card.plain viewSettings
+                [ Element.width Element.fill
+                , Element.scrollbarY
+                ]
+            <|
                 Element.column
                     [ Element.spacing viewSettings.spacing.md
                     , Element.centerX
                     , Element.padding viewSettings.spacing.lg
+                    , Element.width Element.fill
                     ]
                     [ postTitleView viewSettings page.metadata
                     , page.view
@@ -39,7 +44,10 @@ view { viewSettings, siteMetadata, page } =
 
 postTitleView : ViewSettings -> PostMetadata -> Element msg
 postTitleView viewSettings { title, published } =
-    Element.column [ Element.spacing viewSettings.spacing.xs ]
+    Element.column
+        [ Element.width Element.fill
+        , Element.spacing viewSettings.spacing.xs
+        ]
         [ Element.paragraph
             [ Font.bold
             , Element.Region.heading 1
