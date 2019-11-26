@@ -2,8 +2,12 @@ module Pages.Post exposing (view)
 
 import Date
 import Element exposing (Element)
+import Element.Border as Border
 import Element.Font as Font
 import Element.Region
+import Html
+import Html.Attributes
+import Json.Encode
 import Layout
 import Metadata exposing (Metadata, PostMetadata)
 import Pages
@@ -31,13 +35,35 @@ view { viewSettings, siteMetadata, page } =
                 ]
             <|
                 Element.column
-                    [ Element.spacing viewSettings.spacing.md
+                    [ Element.spacing viewSettings.spacing.lg
                     , Element.centerX
                     , Element.padding viewSettings.spacing.lg
                     , Element.width Element.fill
                     ]
                     [ postTitleView viewSettings page.metadata
                     , page.view
+                    , Element.el
+                        [ Element.width Element.fill
+                        , Border.widthEach
+                            { top = 5
+                            , right = 0
+                            , bottom = 0
+                            , left = 0
+                            }
+                        , Element.paddingEach
+                            { top = viewSettings.spacing.sm
+                            , right = 0
+                            , bottom = 0
+                            , left = 0
+                            }
+                        ]
+                      <|
+                        Element.html <|
+                            Html.node "simple-comments"
+                                [ Html.Attributes.property "discussionId"
+                                    (Json.Encode.string <| Pages.PagePath.toString page.path)
+                                ]
+                                []
                     ]
         }
 
@@ -47,6 +73,18 @@ postTitleView viewSettings { title, published } =
     Element.column
         [ Element.width Element.fill
         , Element.spacing viewSettings.spacing.xs
+        , Border.widthEach
+            { top = 0
+            , right = 0
+            , bottom = 5
+            , left = 0
+            }
+        , Element.paddingEach
+            { top = viewSettings.spacing.sm
+            , right = 0
+            , bottom = viewSettings.spacing.sm
+            , left = 0
+            }
         ]
         [ Element.paragraph
             [ Font.bold
