@@ -25,7 +25,10 @@ view { viewSettings, page } =
                 }
 
         Nothing ->
-            Element.text "TODO"
+            Layout.fullScreen
+                { viewSettings = viewSettings
+                , content = page.view
+                }
 
 
 viewExternalProject :
@@ -39,6 +42,7 @@ viewExternalProject { viewSettings, page } =
         , content =
             Element.column
                 [ Element.width (Element.fill |> Element.maximum 500)
+                , Element.height Element.fill
                 , Element.centerX
                 , Element.spacing viewSettings.spacing.md
                 ]

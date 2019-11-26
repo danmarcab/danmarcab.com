@@ -58,7 +58,7 @@ takeProjects { projectsToShow, siteMetadata } =
                     Nothing
         )
         siteMetadata
-        |> List.sortBy (\( _, { published } ) -> Date.toRataDie published)
+        |> List.sortBy (\( _, { published } ) -> -(Date.toRataDie published))
         |> List.take projectsToShow
 
 

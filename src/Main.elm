@@ -110,7 +110,7 @@ subscriptions _ =
 view : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey -> { title : String, body : Html Msg }
 view model siteMetadata page =
     let
-        { title, body } =
+        { title, body, fillHeight } =
             pageView model siteMetadata page
     in
     { title = title
@@ -118,7 +118,13 @@ view model siteMetadata page =
         body
             |> Element.layout
                 [ Element.width Element.fill
-                , Element.height Element.fill
+                , Element.height
+                    (if fillHeight then
+                        Element.fill
+
+                     else
+                        Element.shrink
+                    )
                 , Font.size model.viewSettings.font.size.md
                 , Font.family [ Font.typeface "Roboto" ]
                 , Font.color model.viewSettings.font.color.primary
@@ -127,7 +133,11 @@ view model siteMetadata page =
     }
 
 
-pageView : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey -> { title : String, body : Element Msg }
+pageView :
+    Model
+    -> List ( PagePath Pages.PathKey, Metadata )
+    -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey
+    -> { title : String, body : Element Msg, fillHeight : Bool }
 pageView model siteMetadata page =
     case page.metadata of
         Metadata.Homepage metadata ->
@@ -137,6 +147,7 @@ pageView model siteMetadata page =
                     { viewSettings = model.viewSettings
                     , siteMetadata = siteMetadata
                     }
+            , fillHeight = False
             }
 
         Metadata.Post metadata ->
@@ -151,6 +162,7 @@ pageView model siteMetadata page =
                         , metadata = metadata
                         }
                     }
+            , fillHeight = True
             }
 
         Metadata.Project metadata ->
@@ -165,6 +177,7 @@ pageView model siteMetadata page =
                         , metadata = metadata
                         }
                     }
+            , fillHeight = True
             }
 
 

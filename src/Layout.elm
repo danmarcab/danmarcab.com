@@ -1,6 +1,7 @@
-module Layout exposing (withHeader, withHeaderAndTwoColumns, withSidebar)
+module Layout exposing (fullScreen, withHeader, withHeaderAndTwoColumns, withSidebar)
 
 import Element exposing (Element)
+import Element.Background as Background
 import Element.Region
 import Metadata exposing (Metadata)
 import Pages
@@ -8,6 +9,7 @@ import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.Footer as Footer
 import Widget.Header as Header
+import Widget.MinimalHeader as MinimalHeader
 import Widget.Sidebar as Sidebar
 
 
@@ -59,6 +61,7 @@ withHeaderAndTwoColumns { viewSettings, leftColumn, rightColumn } =
         , Element.padding viewSettings.spacing.lg
         , Element.spacing viewSettings.spacing.lg
         , Element.centerX
+        , Background.color viewSettings.color.mainBackground
         , Element.Region.mainContent
         ]
         [ Header.view { viewSettings = viewSettings }
@@ -98,3 +101,15 @@ withHeader { viewSettings, content } =
         , content
         , Footer.view { viewSettings = viewSettings }
         ]
+
+
+fullScreen :
+    { viewSettings : ViewSettings, content : Element msg }
+    -> Element msg
+fullScreen { viewSettings, content } =
+    Element.el
+        [ Element.Region.mainContent
+        , Element.inFront <| MinimalHeader.view { viewSettings = viewSettings }
+        ]
+    <|
+        content
