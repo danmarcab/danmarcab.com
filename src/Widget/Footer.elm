@@ -41,7 +41,12 @@ mailingListView viewSettings =
 profilesView : ViewSettings -> Element msg
 profilesView viewSettings =
     Element.row [ Font.size viewSettings.font.size.sm, Element.spacing viewSettings.spacing.md ]
-        [ Element.text "Find me on:", twitterLink viewSettings, githubLink viewSettings ]
+        [ Element.text "Find me on:"
+        , emailLink viewSettings
+        , twitterLink viewSettings
+        , githubLink viewSettings
+        , linkedinLink viewSettings
+        ]
 
 
 mailListLink : ViewSettings -> Element msg
@@ -80,6 +85,32 @@ githubLink viewSettings =
                 , color = viewSettings.font.color.primary
                 }
                 Icon.github
+        }
+
+
+emailLink : ViewSettings -> Element msg
+emailLink viewSettings =
+    Element.newTabLink []
+        { url = "mailto:danmarcab+web@gmail.com"
+        , label =
+            Icon.view
+                { size = viewSettings.font.size.lg
+                , color = viewSettings.font.color.primary
+                }
+                Icon.mail
+        }
+
+
+linkedinLink : ViewSettings -> Element msg
+linkedinLink viewSettings =
+    Element.newTabLink []
+        { url = "https://www.linkedin.com/in/daniel-mar%C3%ADn-cabillas-09b50254/"
+        , label =
+            Icon.view
+                { size = viewSettings.font.size.lg
+                , color = viewSettings.font.color.primary
+                }
+                Icon.linkedin
         }
 
 
