@@ -16,12 +16,26 @@ view :
     }
     -> Element msg
 view { viewSettings, siteMetadata } =
-    Layout.withHeaderAndTwoColumns
-        { viewSettings = viewSettings
-        , leftColumn =
-            LatestPosts.expanded viewSettings
-                { siteMetadata = siteMetadata, postsToShow = 5 }
-        , rightColumn =
-            LatestProjects.view viewSettings
-                { siteMetadata = siteMetadata, projectsToShow = 5 }
-        }
+    case viewSettings.size of
+        ViewSettings.Small ->
+            Layout.withHeader
+                { viewSettings = viewSettings
+                , content =
+                    Element.column [ Element.spacing viewSettings.spacing.lg ]
+                        [ LatestPosts.expanded viewSettings
+                            { siteMetadata = siteMetadata, postsToShow = 5 }
+                        , LatestProjects.view viewSettings
+                            { siteMetadata = siteMetadata, projectsToShow = 5 }
+                        ]
+                }
+
+        _ ->
+            Layout.withHeaderAndTwoColumns
+                { viewSettings = viewSettings
+                , leftColumn =
+                    LatestPosts.expanded viewSettings
+                        { siteMetadata = siteMetadata, postsToShow = 5 }
+                , rightColumn =
+                    LatestProjects.view viewSettings
+                        { siteMetadata = siteMetadata, projectsToShow = 5 }
+                }

@@ -65,7 +65,13 @@ forDevice : Element.Device -> ViewSettings
 forDevice device =
     case device.class of
         Phone ->
-            settings Small device
+            case device.orientation of
+                Portrait ->
+                    settings Small device
+
+                Landscape ->
+                    settings Small device
+                        |> (\s -> { s | size = Medium })
 
         Tablet ->
             case device.orientation of
@@ -73,7 +79,8 @@ forDevice device =
                     settings Medium device
 
                 Landscape ->
-                    settings Large device
+                    settings Medium device
+                        |> (\s -> { s | size = Large })
 
         Desktop ->
             settings Large device

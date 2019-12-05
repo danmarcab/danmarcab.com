@@ -23,49 +23,69 @@ view :
     , page : Page PostMetadata (Element msg) Pages.PathKey
     }
     -> Element msg
-view { viewSettings, siteMetadata, page } =
-    Layout.withSidebar
-        { viewSettings = viewSettings
-        , siteMetadata = siteMetadata
-        , currentPath = page.path
-        , content =
-            Card.plain viewSettings
+view ({ viewSettings, siteMetadata, page } as params) =
+    case viewSettings.size of
+        ViewSettings.Large ->
+            Layout.withSidebar
+                { viewSettings = viewSettings
+                , siteMetadata = siteMetadata
+                , currentPath = page.path
+                , content = contentView params []
+                }
+
+        _ ->
+            Layout.withHeader
+                { viewSettings = viewSettings
+                , content = contentView params [ Element.height Element.fill ]
+                }
+
+
+contentView :
+    { viewSettings : ViewSettings
+    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , page : Page PostMetadata (Element msg) Pages.PathKey
+    }
+    -> List (Element.Attribute msg)
+    -> Element msg
+contentView { viewSettings, siteMetadata, page } attrs =
+    Card.plain viewSettings
+        ([ Element.width Element.fill
+         , Element.scrollbarY
+         ]
+            ++ attrs
+        )
+    <|
+        Element.column
+            [ Element.spacing viewSettings.spacing.lg
+            , Element.centerX
+            , Element.padding viewSettings.spacing.lg
+            , Element.width Element.fill
+            ]
+            [ postTitleView viewSettings page.metadata
+            , page.view
+            , Element.el
                 [ Element.width Element.fill
-                , Element.scrollbarY
+                , Border.widthEach
+                    { top = 5
+                    , right = 0
+                    , bottom = 0
+                    , left = 0
+                    }
+                , Element.paddingEach
+                    { top = viewSettings.spacing.sm
+                    , right = 0
+                    , bottom = 0
+                    , left = 0
+                    }
                 ]
-            <|
-                Element.column
-                    [ Element.spacing viewSettings.spacing.lg
-                    , Element.centerX
-                    , Element.padding viewSettings.spacing.lg
-                    , Element.width Element.fill
-                    ]
-                    [ postTitleView viewSettings page.metadata
-                    , page.view
-                    , Element.el
-                        [ Element.width Element.fill
-                        , Border.widthEach
-                            { top = 5
-                            , right = 0
-                            , bottom = 0
-                            , left = 0
-                            }
-                        , Element.paddingEach
-                            { top = viewSettings.spacing.sm
-                            , right = 0
-                            , bottom = 0
-                            , left = 0
-                            }
+              <|
+                Element.html <|
+                    Html.node "simple-comments"
+                        [ Html.Attributes.property "discussionId"
+                            (Json.Encode.string <| Pages.PagePath.toString page.path)
                         ]
-                      <|
-                        Element.html <|
-                            Html.node "simple-comments"
-                                [ Html.Attributes.property "discussionId"
-                                    (Json.Encode.string <| Pages.PagePath.toString page.path)
-                                ]
-                                []
-                    ]
-        }
+                        []
+            ]
 
 
 postTitleView : ViewSettings -> PostMetadata -> Element msg

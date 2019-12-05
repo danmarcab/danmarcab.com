@@ -12,7 +12,9 @@ view : { viewSettings : ViewSettings } -> Element msg
 view { viewSettings } =
     Element.wrappedRow
         [ Element.width Element.fill
+        , Element.spacingXY viewSettings.spacing.xl viewSettings.spacing.md
         , Element.spaceEvenly
+        , Element.alignBottom
         , Border.widthEach
             { top = 5
             , right = 0

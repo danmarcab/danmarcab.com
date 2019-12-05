@@ -93,7 +93,7 @@ withHeader { viewSettings, content } =
         [ Element.width (Element.fill |> Element.maximum 1400)
         , Element.height Element.fill
         , Element.padding viewSettings.spacing.lg
-        , Element.spacing viewSettings.spacing.xl
+        , Element.spacing viewSettings.spacing.lg
         , Element.centerX
         , Element.Region.mainContent
         ]
