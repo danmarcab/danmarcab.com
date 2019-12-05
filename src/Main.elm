@@ -1,5 +1,7 @@
 module Main exposing (main)
 
+import Browser.Dom
+import Browser.Events
 import Color
 import Date
 import Element exposing (Element)
@@ -19,6 +21,7 @@ import Pages.PagePath exposing (PagePath)
 import Pages.Platform exposing (Page)
 import Pages.Post
 import Pages.Project
+import Task
 import ViewSettings exposing (ViewSettings)
 
 
@@ -81,34 +84,59 @@ markdownDocument =
         }
 
 
-type alias Model =
+type Model
+    = Loading
+    | Loaded LoadedModel
+
+
+type alias LoadedModel =
     { viewSettings : ViewSettings
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { viewSettings = ViewSettings.default }
-    , Cmd.none
+    ( Loading
+    , Task.perform (\vp -> SizeChanged (round vp.scene.width) (round vp.scene.height)) Browser.Dom.getViewport
     )
 
 
-type alias Msg =
-    ()
+type Msg
+    = SizeChanged Int Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    case msg of
+        SizeChanged w h ->
+            ( Loaded { viewSettings = ViewSettings.forSize w h }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize SizeChanged
 
 
-view : Model -> List ( PagePath Pages.PathKey, Metadata ) -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey -> { title : String, body : Html Msg }
+view :
+    Model
+    -> List ( PagePath Pages.PathKey, Metadata )
+    -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey
+    -> { title : String, body : Html Msg }
 view model siteMetadata page =
+    case model of
+        Loading ->
+            loadingView
+
+        Loaded loadedModel ->
+            loadedView loadedModel siteMetadata page
+
+
+loadedView :
+    LoadedModel
+    -> List ( PagePath Pages.PathKey, Metadata )
+    -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey
+    -> { title : String, body : Html Msg }
+loadedView model siteMetadata page =
     let
         { title, body, fillHeight } =
             pageView model siteMetadata page
@@ -133,8 +161,15 @@ view model siteMetadata page =
     }
 
 
+loadingView : { title : String, body : Html Msg }
+loadingView =
+    { title = "Loading..."
+    , body = Html.text "Loading..."
+    }
+
+
 pageView :
-    Model
+    LoadedModel
     -> List ( PagePath Pages.PathKey, Metadata )
     -> Page Metadata (ViewSettings -> Rendered) Pages.PathKey
     -> { title : String, body : Element Msg, fillHeight : Bool }
