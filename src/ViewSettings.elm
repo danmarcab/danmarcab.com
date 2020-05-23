@@ -19,6 +19,7 @@ type alias ViewSettings =
     , color : ColorSettings
     , device : Element.Device
     , size : Size
+    , pixelSize : PixelSize
     }
 
 
@@ -47,6 +48,12 @@ type alias ColorSettings =
     }
 
 
+type alias PixelSize =
+    { width : Int
+    , height : Int
+    }
+
+
 type alias Sizes =
     { xs : Int
     , sm : Int
@@ -58,40 +65,41 @@ type alias Sizes =
 
 forSize : Int -> Int -> ViewSettings
 forSize width height =
-    forDevice <| Element.classifyDevice { width = width, height = height }
+    forDevice (Element.classifyDevice { width = width, height = height }) { width = width, height = height }
 
 
-forDevice : Element.Device -> ViewSettings
-forDevice device =
+forDevice : Element.Device -> PixelSize -> ViewSettings
+forDevice device pixelSize =
     case device.class of
         Phone ->
             case device.orientation of
                 Portrait ->
-                    settings Small device
+                    settings Small pixelSize device
 
                 Landscape ->
-                    settings Small device
+                    settings Small pixelSize device
                         |> (\s -> { s | size = Medium })
 
         Tablet ->
             case device.orientation of
                 Portrait ->
-                    settings Medium device
+                    settings Medium pixelSize device
 
                 Landscape ->
-                    settings Medium device
+                    settings Medium pixelSize device
                         |> (\s -> { s | size = Large })
 
         Desktop ->
-            settings Large device
+            settings Large pixelSize device
 
         BigDesktop ->
-            settings Large device
+            settings Large pixelSize device
 
 
-settings : Size -> Element.Device -> ViewSettings
-settings size device =
+settings : Size -> PixelSize -> Element.Device -> ViewSettings
+settings size pixelSize device =
     { size = size
+    , pixelSize = pixelSize
     , device = device
     , font =
         { color = fontColorSettings

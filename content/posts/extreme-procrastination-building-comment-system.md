@@ -32,7 +32,7 @@ been *too easy*, and I would have had to start writing! So I decided to keep loo
 - It didn't have ads.
 - It respected privacy.
 
-"Shouldn't I just forget about comments? how likely am I too receive even one comment?" I thought. And 
+"Shouldn't I just forget about comments? how likely am I to receive even one comment?" I thought. And
 it definitely would have been wise, nevertheless I kept looking. At some point I figured I wasn't going
 to find anything and decided to move on.
 

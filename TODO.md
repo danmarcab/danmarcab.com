@@ -2,7 +2,6 @@
 ## Soon
 
 - Only show sticky header/footer or sidebar for large devices
-- bug: a wide code snippet makes site grow more than intended (in 2 column view only)
 - post about responsiveness
 - darkMode
 - About me page
