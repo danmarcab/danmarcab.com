@@ -21,15 +21,34 @@ withSidebar :
     }
     -> Element msg
 withSidebar { viewSettings, siteMetadata, currentPath, content } =
+    let
+        padding =
+            viewSettings.spacing.lg
+
+        spacing =
+            viewSettings.spacing.xl
+
+        widthWithoutPaddingAndSpacing =
+            min viewSettings.pixelSize.width 1400 - 2 * padding - spacing
+
+        portionWidth =
+            widthWithoutPaddingAndSpacing // 4
+
+        sidebarWidth =
+            portionWidth
+
+        contentWidth =
+            3 * portionWidth
+    in
     Element.row
         [ Element.width (Element.fill |> Element.maximum 1400)
         , Element.height Element.fill
-        , Element.padding viewSettings.spacing.lg
-        , Element.spacing viewSettings.spacing.xl
+        , Element.padding padding
+        , Element.spacing spacing
         , Element.centerX
         ]
         [ Element.el
-            [ Element.width (Element.fillPortion 1)
+            [ Element.width (Element.px sidebarWidth)
             , Element.height Element.fill
             , Element.Region.navigation
             ]
@@ -42,7 +61,7 @@ withSidebar { viewSettings, siteMetadata, currentPath, content } =
         , Element.el
             [ Element.height Element.fill
             , Element.Region.mainContent
-            , Element.width (Element.fillPortion 3)
+            , Element.width (Element.px contentWidth)
             ]
             content
         ]

@@ -4,10 +4,13 @@ import Element exposing (Element)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Lazy
 import Element.Region
 import FeatherIcons
 import Html exposing (Attribute, Html)
 import Html.Attributes exposing (property)
+import Html.Keyed
+import Html.Lazy
 import Json.Encode as Encode exposing (Value)
 import Markdown.Block
 import Markdown.Html
@@ -242,7 +245,7 @@ codeBlock : { body : String, language : Maybe String } -> ViewSettings -> Elemen
 codeBlock details viewSettings =
     Html.node "code-editor"
         ([ editorValue details.body
-         , Html.Attributes.style "white-space" "normal"
+         , Html.Attributes.style "overflow" "scroll"
          ]
             ++ (Maybe.map
                     (\lang ->
@@ -254,7 +257,8 @@ codeBlock details viewSettings =
         )
         []
         |> Element.html
-        |> Element.el [ Element.width Element.fill ]
+        |> Element.el
+            [ Element.width Element.fill ]
 
 
 editorValue : String -> Attribute msg
