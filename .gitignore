@@ -1,6 +1,7 @@
 node_modules/
 elm-stuff/
 dist/
-.cache/
-gen/
+.elm-pages/
+functions/render/elm-pages-cli.js
 content/posts/test.md
+*.code-workspace

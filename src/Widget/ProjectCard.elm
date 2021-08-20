@@ -1,19 +1,18 @@
 module Widget.ProjectCard exposing (view)
 
+import Data.Project as Project
 import Date
 import Element exposing (Element)
 import Element.Font as Font
 import FeatherIcons as Icon
-import Metadata exposing (ProjectMetadata)
 import Pages
-import Pages.PagePath as PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.Card as Card
 import Widget.Icon as Icon
 
 
-view : ViewSettings -> { path : PagePath Pages.PathKey, project : ProjectMetadata } -> Element msg
-view viewSettings { path, project } =
+view : ViewSettings -> { project : Project.Metadata } -> Element msg
+view viewSettings { project } =
     let
         ( external, url ) =
             case project.externalUrl of
@@ -21,7 +20,7 @@ view viewSettings { path, project } =
                     ( True, externalUrl )
 
                 Nothing ->
-                    ( False, PagePath.toString path )
+                    ( False, "/projects/" ++ project.slug )
     in
     Card.linkWithImage viewSettings
         []
@@ -35,7 +34,7 @@ view viewSettings { path, project } =
         }
 
 
-projectView : ViewSettings -> ProjectMetadata -> Element msg
+projectView : ViewSettings -> Project.Metadata -> Element msg
 projectView viewSettings projectMetadata =
     Element.column
         [ Element.spacing viewSettings.spacing.sm

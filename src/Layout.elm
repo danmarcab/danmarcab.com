@@ -1,11 +1,10 @@
 module Layout exposing (fullScreen, withHeader, withHeaderAndTwoColumns, withSidebar)
 
+import Data.Post as Post
 import Element exposing (Element)
 import Element.Background as Background
 import Element.Region
-import Metadata exposing (Metadata)
 import Pages
-import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.Footer as Footer
 import Widget.Header as Header
@@ -15,12 +14,12 @@ import Widget.Sidebar as Sidebar
 
 withSidebar :
     { viewSettings : ViewSettings
-    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
-    , currentPath : PagePath Pages.PathKey
+    , currentPath : String
+    , posts : List Post.Metadata
     , content : Element msg
     }
     -> Element msg
-withSidebar { viewSettings, siteMetadata, currentPath, content } =
+withSidebar { viewSettings, currentPath, posts, content } =
     let
         padding =
             viewSettings.spacing.lg
@@ -54,7 +53,7 @@ withSidebar { viewSettings, siteMetadata, currentPath, content } =
             ]
             (Sidebar.view
                 { viewSettings = viewSettings
-                , siteMetadata = siteMetadata
+                , posts = posts
                 , currentPath = currentPath
                 }
             )

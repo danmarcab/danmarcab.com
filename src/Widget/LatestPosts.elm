@@ -1,12 +1,11 @@
 module Widget.LatestPosts exposing (compact, expanded)
 
+import Data.Post as Post
 import Date
 import Element exposing (Element)
 import Element.Border as Border
 import Element.Font as Font
-import Metadata exposing (Metadata(..), PostMetadata)
 import Pages
-import Pages.PagePath as PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.Card as Card
 
@@ -15,7 +14,7 @@ compact :
     ViewSettings
     ->
         { postsToShow : Int
-        , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+        , posts : List Post.Metadata
         }
     -> Element msg
 compact viewSettings opts =
@@ -23,9 +22,9 @@ compact viewSettings opts =
         latestPosts =
             takePosts opts
 
-        postLinkView ( path, post ) =
+        postLinkView post =
             Element.link []
-                { url = PagePath.toString path
+                { url = "/posts/" ++ post.slug
                 , label = postView viewSettings Compact post
                 }
     in
@@ -43,7 +42,7 @@ expanded :
     ViewSettings
     ->
         { postsToShow : Int
-        , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+        , posts : List Post.Metadata
         }
     -> Element msg
 expanded viewSettings opts =
@@ -51,10 +50,10 @@ expanded viewSettings opts =
         latestPosts =
             takePosts opts
 
-        postCardView ( path, post ) =
+        postCardView post =
             Card.link viewSettings
                 []
-                { url = PagePath.toString path
+                { url = "/posts/" ++ post.slug
                 , openInNewTab = False
                 , content =
                     Element.el [ Element.padding viewSettings.spacing.md ] <|
@@ -88,25 +87,20 @@ modeDependent mode compactValue expandedValue =
 
 takePosts :
     { postsToShow : Int
-    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , posts : List Post.Metadata
     }
-    -> List ( PagePath Pages.PathKey, PostMetadata )
-takePosts { postsToShow, siteMetadata } =
+    -> List Post.Metadata
+takePosts { postsToShow, posts } =
     List.filterMap
-        (\( path, metadata ) ->
-            case metadata of
-                Metadata.Post meta ->
-                    if meta.draft then
-                        Nothing
+        (\post ->
+            if post.draft then
+                Nothing
 
-                    else
-                        Just ( path, meta )
-
-                _ ->
-                    Nothing
+            else
+                Just post
         )
-        siteMetadata
-        |> List.sortBy (\( _, { published } ) -> -(Date.toRataDie published))
+        posts
+        |> List.sortBy (\{ published } -> -(Date.toRataDie published))
         |> List.take postsToShow
 
 
@@ -135,7 +129,7 @@ listHeading viewSettings mode =
         Element.text "latest posts"
 
 
-postView : ViewSettings -> Mode -> PostMetadata -> Element msg
+postView : ViewSettings -> Mode -> Post.Metadata -> Element msg
 postView viewSettings mode postMetadata =
     Element.column
         [ Element.spacing (modeDependent mode viewSettings.spacing.xs viewSettings.spacing.sm)

@@ -1,10 +1,10 @@
 module Widget.Sidebar exposing (view)
 
+import Data.Post as Post
+import Data.Project as Project
 import Element exposing (Element)
 import Element.Border as Border
-import Metadata exposing (Metadata(..))
 import Pages
-import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.Footer as Footer
 import Widget.LatestPosts as LatestPosts
@@ -13,11 +13,11 @@ import Widget.Sitename as Sitename
 
 view :
     { viewSettings : ViewSettings
-    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
-    , currentPath : PagePath Pages.PathKey
+    , posts : List Post.Metadata
+    , currentPath : String
     }
     -> Element msg
-view { viewSettings, siteMetadata } =
+view { viewSettings, posts } =
     Element.column
         [ Element.height Element.fill
         , Element.width Element.fill
@@ -45,7 +45,7 @@ view { viewSettings, siteMetadata } =
         --            , currentlyReading
         --            , related (tags?)
         --            , posts in the same series
-        , LatestPosts.compact viewSettings { postsToShow = 3, siteMetadata = siteMetadata }
+        , LatestPosts.compact viewSettings { postsToShow = 3, posts = posts }
         , Element.column
             [ Element.alignBottom
             , Element.spacing viewSettings.spacing.sm
