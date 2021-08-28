@@ -1,5 +1,6 @@
 module Site exposing (config)
 
+import Cloudinary
 import DataSource
 import Head
 import MimeType
@@ -30,7 +31,10 @@ data =
 
 head : Data -> List Head.Tag
 head static =
-    [ Head.icon [ ( 256, 256 ) ] (MimeType.OtherImage "Svg") (Pages.Url.fromPath (Path.join [ "images", "icon.svg" ]))
+    [ Head.icon [ ( 32, 32 ) ] MimeType.Png (cloudinaryIcon MimeType.Png 32)
+    , Head.icon [ ( 16, 16 ) ] MimeType.Png (cloudinaryIcon MimeType.Png 16)
+    , Head.appleTouchIcon (Just 180) (cloudinaryIcon MimeType.Png 180)
+    , Head.appleTouchIcon (Just 192) (cloudinaryIcon MimeType.Png 192)
     , Head.sitemapLink "/sitemap.xml"
     ]
 
@@ -42,9 +46,17 @@ manifest static =
         , description = "Description"
         , startUrl = Route.Index |> Route.toPath
         , icons =
-            [ icon (MimeType.OtherImage "Svg") 32
+            [ icon webp 192
+            , icon webp 512
+            , icon MimeType.Png 192
+            , icon MimeType.Png 512
             ]
         }
+
+
+webp : MimeType.MimeImage
+webp =
+    MimeType.OtherImage "webp"
 
 
 icon :
@@ -52,8 +64,16 @@ icon :
     -> Int
     -> Manifest.Icon
 icon format width =
-    { src = Pages.Url.fromPath (Path.join [ "images", "icon.svg" ])
+    { src = cloudinaryIcon format width
     , sizes = [ ( width, width ) ]
     , mimeType = format |> Just
     , purposes = [ Manifest.IconPurposeAny, Manifest.IconPurposeMaskable ]
     }
+
+
+cloudinaryIcon :
+    MimeType.MimeImage
+    -> Int
+    -> Pages.Url.Url
+cloudinaryIcon mimeType width =
+    Cloudinary.urlSquare "v1630159618/danmarcab-icon" (Just mimeType) width
