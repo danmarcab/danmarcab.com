@@ -97,7 +97,7 @@ Given the decision on using graphql our data model is expressed in the [graphql 
 ). It is extremely simple, and it is shown below:
 
 
-```
+```elm
 type Comment (
     discussionId: String!,
     content: String!,

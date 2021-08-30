@@ -4,7 +4,6 @@ import Element exposing (Element)
 import Element.Background as Background
 import Element.Border as Border
 import Pages
-import Pages.ImagePath as ImagePath exposing (ImagePath)
 import ViewSettings exposing (ViewSettings)
 
 
@@ -39,7 +38,7 @@ linkWithImage :
     ViewSettings
     -> List (Element.Attribute msg)
     ->
-        { imagePath : ImagePath Pages.PathKey
+        { imagePath : String
         , imageDescription : String
         , url : String
         , openInNewTab : Bool
@@ -54,7 +53,7 @@ linkWithImage viewSettings attrs { url, imagePath, openInNewTab, imageDescriptio
             Element.column
                 (commonAttributes viewSettings ++ mouseOverAttributes viewSettings ++ attrs)
                 [ Element.image [ Element.width Element.fill ]
-                    { src = ImagePath.toString imagePath
+                    { src = imagePath
                     , description = imageDescription
                     }
                 , content

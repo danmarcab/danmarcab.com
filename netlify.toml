@@ -1,9 +1,10 @@
 [build]
-  publish = "./dist/"
-  command = "npm run build"
+  functions = "functions/"
+  publish = "dist/"
+  command = "export ELM_HOME=\"$NETLIFY_BUILD_BASE/cache/elm\" && npm install --no-optional && npm run build"
 
-[[redirects]]
-  from = "/api/*"
-  to = "https://135.181.103.5/:splat"
-  status = 200
-  force = true
+[dev]
+  command = "npm start"
+  targetPort = 1234
+  autoLaunch = true
+  framework = "#custom"

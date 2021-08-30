@@ -16,13 +16,13 @@ customElements.define(
       this._src = value;
     }
 
-    get appName() {
-      return this._appName;
+    get appname() {
+      return this._appname;
     }
 
-    set appName(value) {
-      if (this._appName === value) return;
-      this._appName = value;
+    set appname(value) {
+      if (this._appname === value) return;
+      this._appname = value;
     }
 
     get flags() {
@@ -37,7 +37,7 @@ customElements.define(
     connectedCallback() {
       const elmAppScript = document.createElement('script');
       const targetNode = document.createElement('div');
-      const appName = this.appName;
+      const appname = this.appname;
       const flags = this.flags;
 
       elmAppScript.src = this.src;
@@ -46,7 +46,7 @@ customElements.define(
       this.appendChild(elmAppScript);
 
       elmAppScript.addEventListener('load', function () {
-        window[appName].init({node: targetNode, flags: flags});
+        window[appname].init({ node: targetNode, flags: flags });
       }, false);
     }
   }

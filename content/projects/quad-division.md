@@ -8,4 +8,4 @@
   "githubUrl": "https://github.com/danmarcab/quad-division"
 }
 ---
-<elm-app src="https://quad-division.netlify.com/QuadDivision.js" appName="QuadDivision" flags="%7B%22elmUIEmbedded%22%3A%20true%7D"/>
+<elm-app src="https://quad-division.netlify.com/QuadDivision.js" appname="QuadDivision" flags="%7B%22elmUIEmbedded%22%3A%20true%7D"/>

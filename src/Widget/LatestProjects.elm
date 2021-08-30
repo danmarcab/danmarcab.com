@@ -1,12 +1,11 @@
 module Widget.LatestProjects exposing (view)
 
+import Data.Project as Project
 import Date
 import Element exposing (Element)
 import Element.Border as Border
 import Element.Font as Font
-import Metadata exposing (Metadata(..), ProjectMetadata)
 import Pages
-import Pages.PagePath exposing (PagePath)
 import ViewSettings exposing (ViewSettings)
 import Widget.ProjectCard as ProjectCard
 
@@ -15,7 +14,7 @@ view :
     ViewSettings
     ->
         { projectsToShow : Int
-        , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+        , projects : List Project.Metadata
         }
     -> Element msg
 view viewSettings opts =
@@ -30,8 +29,8 @@ view viewSettings opts =
         [ listHeading viewSettings
         , Element.column [ Element.spacing viewSettings.spacing.lg ]
             (List.map
-                (\( path, project ) ->
-                    ProjectCard.view viewSettings { path = path, project = project }
+                (\project ->
+                    ProjectCard.view viewSettings { project = project }
                 )
                 latestProjects
             )
@@ -40,25 +39,20 @@ view viewSettings opts =
 
 takeProjects :
     { projectsToShow : Int
-    , siteMetadata : List ( PagePath Pages.PathKey, Metadata )
+    , projects : List Project.Metadata
     }
-    -> List ( PagePath Pages.PathKey, ProjectMetadata )
-takeProjects { projectsToShow, siteMetadata } =
+    -> List Project.Metadata
+takeProjects { projectsToShow, projects } =
     List.filterMap
-        (\( path, metadata ) ->
-            case metadata of
-                Metadata.Project meta ->
-                    if meta.draft then
-                        Nothing
+        (\project ->
+            if project.draft then
+                Nothing
 
-                    else
-                        Just ( path, meta )
-
-                _ ->
-                    Nothing
+            else
+                Just project
         )
-        siteMetadata
-        |> List.sortBy (\( _, { published } ) -> -(Date.toRataDie published))
+        projects
+        |> List.sortBy (\{ published } -> -(Date.toRataDie published))
         |> List.take projectsToShow
 
 
