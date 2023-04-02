@@ -6,6 +6,6 @@
   "image": "/images/projects/functional-data-structures/cardImage.png",
   "published": "2019-10-15",
   "githubUrl": "https://github.com/danmarcab/functional-data-structures",
-  "externalUrl": "https://functionaldatastructures.com/",
+  "externalUrl": "https://functional-data-structures.netlify.app/",
 }
 ---
