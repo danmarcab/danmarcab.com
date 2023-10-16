@@ -9,7 +9,7 @@
     "elm-format": "^0.8.5",
     "elm-json": "^0.2.10",
     "elm-optimize-level-2": "^0.1.5",
-    "elm-pages": "^2.1.9",
+    "elm-pages": "^3.0.8",
     "elm-review": "^2.5.5"
   }
 }
