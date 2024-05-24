@@ -9,7 +9,7 @@
 }
 ---
 lolaas  ass111112233444555666
-<elm-app src="https://show-avl-tree.netlify.com/ShowAvlTree.js" appname="ShowAvlTree" flags="%7B%22elmUIEmbedded%22%3A%20true%7D"/>
+<elm-app src="https://show-avl-tree.netlify.app/ShowAvlTree.js" appname="ShowAvlTree" flags="%7B%22elmUIEmbedded%22%3A%20true%7D"/>
 lololo
 
 jj
