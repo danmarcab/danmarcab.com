@@ -134,7 +134,7 @@ There are 2 main steps, both detailed in the [github repo instructions](https://
 
 <body style="width: 80%; margin: auto">
   <div></div>
-  <script src="https://simple-comments.netlify.com/Comments.js"></script>
+  <script src="https://simple-comments.netlify.app/Comments.js"></script>
   <script>
       startComments((
         node: document.querySelector("div"),
@@ -146,7 +146,7 @@ There are 2 main steps, both detailed in the [github repo instructions](https://
 </body>
 ```
 
-You can play around with the [test implementation](https://simple-comments.netlify.com/) or check how
+You can play around with the [test implementation](https://simple-comments.netlify.app/) or check how
 I integrated it in my elm based blog using a custom element [here](https://github.com/danmarcab/danmarcab.com/blob/cc90a0d60d586e0a0ecc10d8ccdfddfb92579600/src/Pages/Post.elm#L61-L66)
 and [here](https://github.com/danmarcab/danmarcab.com/blob/master/lib/comments.js).
 
