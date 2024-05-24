@@ -138,7 +138,7 @@ renderProject viewSettings project =
         "quad-division" ->
             Element.html <|
                 Html.node "elm-app"
-                    [ Html.Attributes.property "src" (Json.Encode.string "https://quad-division.netlify.com/QuadDivision.js")
+                    [ Html.Attributes.property "src" (Json.Encode.string "https://quad-division.netlify.app/QuadDivision.js")
                     , Html.Attributes.property "appname" (Json.Encode.string "QuadDivision")
                     , Html.Attributes.property "flags" (Json.Encode.string "%7B%22elmUIEmbedded%22%3A%20true%7D")
                     ]
