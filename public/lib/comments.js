@@ -22,7 +22,7 @@ customElements.define(
       let targetNode = document.createElement('div');
       const discussionId = this.discussionId;
 
-      commentsScript.src = "https://simple-comments.netlify.com/Comments.js";
+      commentsScript.src = "https://simple-comments.netlify.app/Comments.js";
 
       this.appendChild(targetNode);
       this.appendChild(commentsScript);
